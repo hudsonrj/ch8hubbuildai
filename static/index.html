@@ -1,0 +1,1810 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CH8 Hub Build AI</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root {
+  --bg: #f0f4ff;
+  --sur: #fff;
+  --sur2: #f1f5f9;
+  --sur3: #e8f0fe;
+  --brd: #e2e8f0;
+  --brd2: #cbd5e1;
+  --brand: #1e3a8a;
+  --accent: #3b82f6;
+  --blue: #1e40af;
+  --bluel: #3b82f6;
+  --bluebg: #eff6ff;
+  --bluebg2: #dbeafe;
+  --teal: #0f766e;
+  --tealbg: #f0fdfa;
+  --tealbg2: #ccfbf1;
+  --green: #16a34a;
+  --greenbg: #f0fdf4;
+  --red: #dc2626;
+  --redbg: #fef2f2;
+  --ora: #ea580c;
+  --orabg: #fff7ed;
+  --yel: #ca8a04;
+  --yelbg: #fefce8;
+  --tx: #0f172a;
+  --tx2: #475569;
+  --tx3: #94a3b8;
+  --tx4: #cbd5e1;
+  --nav-from: #0f172a;
+  --nav-to: #1e3a8a;
+  --sh: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+  --shm: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.05);
+  --shl: 0 10px 24px rgba(0,0,0,.1), 0 4px 8px rgba(0,0,0,.06);
+  --r: 8px;
+  --rl: 12px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--tx);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* ── layout ── */
+.app { display: grid; grid-template-columns: 272px 1fr; min-height: 100vh; }
+
+/* ── sidebar ── */
+.sidebar {
+  background: linear-gradient(160deg, var(--nav-from) 0%, var(--nav-to) 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.sb-header {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  flex-shrink: 0;
+}
+.sb-logo { font-size: 18px; font-weight: 800; letter-spacing: -.4px; }
+.sb-logo span { color: #93c5fd; }
+.sb-sub { font-size: 10px; color: rgba(255,255,255,.4); margin-top: 3px; letter-spacing: .04em; }
+.sb-new {
+  margin: 14px 12px 6px;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.2);
+  color: #fff;
+  border-radius: var(--r);
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  width: calc(100% - 24px);
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background .15s, transform .1s;
+  flex-shrink: 0;
+}
+.sb-new:hover { background: rgba(255,255,255,.18); transform: translateY(-1px); }
+.sb-sec {
+  padding: 12px 18px 5px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.3);
+  letter-spacing: .1em;
+  flex-shrink: 0;
+}
+.sb-list { flex: 1; overflow-y: auto; }
+.sb-item {
+  margin: 2px 8px;
+  padding: 9px 12px;
+  border-radius: var(--r);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  transition: background .15s;
+}
+.sb-item:hover { background: rgba(255,255,255,.09); }
+.sb-item.active { background: rgba(255,255,255,.16); }
+.sb-icon { font-size: 15px; flex-shrink: 0; }
+.sb-info { flex: 1; min-width: 0; }
+.sb-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb-meta { font-size: 10px; color: rgba(255,255,255,.4); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 99px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.sb-badge.done { background: #22c55e; color: #fff; }
+.sb-badge.error { background: #ef4444; color: #fff; }
+.sb-badge.draft, .sb-badge.idle { background: rgba(255,255,255,.15); color: rgba(255,255,255,.7); }
+.sb-badge.processing { background: #f59e0b; color: #fff; animation: blink 1.2s ease infinite; }
+@keyframes blink { 0%,100% { opacity:1 } 50% { opacity:.55 } }
+.sb-bottom {
+  margin-top: auto;
+  padding: 12px 18px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  font-size: 10px;
+  color: rgba(255,255,255,.25);
+  flex-shrink: 0;
+}
+
+/* ── scrollbar ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--brd2); border-radius: 99px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); }
+
+/* ── main ── */
+.main { display: flex; flex-direction: column; min-height: 100vh; }
+.topbar {
+  background: var(--sur);
+  border-bottom: 1px solid var(--brd);
+  padding: 0 28px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: var(--sh);
+}
+.tb-title { font-size: 15px; font-weight: 800; color: var(--brand); }
+.tb-sep { color: var(--tx4); margin: 0 2px; }
+.tb-sub { font-size: 12px; color: var(--tx2); }
+.tb-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+.content { flex: 1; padding: 24px 28px; }
+
+/* ── botões ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--r);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all .15s;
+  white-space: nowrap;
+  line-height: 1;
+  font-family: inherit;
+}
+.btn-primary { background: var(--brand); color: #fff; }
+.btn-primary:hover { background: #1e3299; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(30,58,138,.3); }
+.btn-accent { background: var(--accent); color: #fff; }
+.btn-accent:hover { background: #2563eb; }
+.btn-teal { background: var(--teal); color: #fff; }
+.btn-teal:hover { background: #0d6460; }
+.btn-ghost { background: transparent; color: var(--tx2); border: 1px solid var(--brd2); }
+.btn-ghost:hover { background: var(--sur2); color: var(--tx); }
+.btn-danger { background: var(--redbg); color: var(--red); border: 1px solid #fecaca; }
+.btn-danger:hover { background: #fee2e2; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-lg { padding: 11px 22px; font-size: 14px; }
+.btn:disabled { opacity: .4; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+/* ── tabs ── */
+.tabs {
+  display: flex;
+  border-bottom: 2px solid var(--brd);
+  gap: 0;
+  margin-bottom: 22px;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+}
+.tbt {
+  padding: 10px 15px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--tx2);
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all .15s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.tbt:hover { color: var(--brand); background: var(--bluebg); }
+.tbt.active { color: var(--brand); border-bottom-color: var(--brand); }
+.tbt.locked { opacity: .38; cursor: not-allowed; }
+.tp { display: none; }
+.tp.active { display: block; }
+
+/* ── sub-tabs ── */
+.subtabs { display: flex; gap: 5px; margin-bottom: 16px; flex-wrap: wrap; }
+.stbt {
+  padding: 6px 13px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tx2);
+  border: 1px solid var(--brd);
+  background: var(--sur2);
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: all .15s;
+  font-family: inherit;
+}
+.stbt:hover { border-color: var(--accent); color: var(--brand); }
+.stbt.active { background: var(--bluebg2); color: var(--brand); border-color: var(--accent); }
+.stp { display: none; }
+.stp.active { display: block; }
+
+/* ── cards ── */
+.card {
+  background: var(--sur);
+  border: 1px solid var(--brd);
+  border-radius: var(--rl);
+  padding: 20px;
+  box-shadow: var(--sh);
+  margin-bottom: 16px;
+  transition: box-shadow .2s;
+}
+.card:hover { box-shadow: var(--shm); }
+.card-h {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--brand);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.card-grid.full { grid-template-columns: 1fr; }
+.card-full { grid-column: 1/-1; }
+
+/* ── form ── */
+.fg { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+.fg label { font-size: 11.5px; font-weight: 600; color: var(--tx2); }
+.fg input, .fg textarea, .fg select {
+  padding: 9px 12px;
+  border: 1px solid var(--brd2);
+  border-radius: var(--r);
+  font-size: 13px;
+  color: var(--tx);
+  background: var(--sur);
+  font-family: inherit;
+  transition: border-color .15s, box-shadow .15s;
+}
+.fg input:focus, .fg textarea:focus, .fg select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+}
+.fg textarea { resize: vertical; min-height: 80px; line-height: 1.55; }
+.fg .hint { font-size: 11px; color: var(--tx3); }
+.frow { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.frow.full { grid-template-columns: 1fr; }
+
+/* ── upload ── */
+.dropzone {
+  border: 2px dashed var(--brd2);
+  border-radius: var(--rl);
+  padding: 36px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  background: var(--sur2);
+}
+.dropzone:hover, .dropzone.drag { border-color: var(--accent); background: var(--bluebg); }
+.dropzone .dz-icon { font-size: 36px; margin-bottom: 10px; }
+.dropzone h4 { font-size: 14px; font-weight: 700; color: var(--brand); }
+.dropzone p { font-size: 12px; color: var(--tx3); margin-top: 4px; }
+.file-list { margin-top: 12px; display: flex; flex-direction: column; gap: 5px; }
+.fi { display: flex; align-items: center; gap: 9px; padding: 8px 12px; background: var(--sur); border: 1px solid var(--brd); border-radius: var(--r); font-size: 12px; }
+.fi-icon { font-size: 15px; flex-shrink: 0; }
+.fi-name { flex: 1; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fi-size { color: var(--tx3); flex-shrink: 0; }
+.fi-del { background: none; border: none; color: var(--tx3); cursor: pointer; padding: 3px 7px; border-radius: 5px; font-size: 13px; }
+.fi-del:hover { background: var(--redbg); color: var(--red); }
+
+/* ── progresso ── */
+.prog-wrap { background: var(--sur2); border-radius: 99px; height: 10px; overflow: hidden; margin: 10px 0; }
+.prog-bar { height: 100%; background: linear-gradient(90deg, var(--brand), var(--accent)); border-radius: 99px; transition: width .6s ease; }
+.steps-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.step-row { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+.step-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.step-dot.done { background: var(--green); color: #fff; }
+.step-dot.active { background: var(--brand); color: #fff; animation: pulse .9s infinite; }
+.step-dot.pending { background: var(--sur2); color: var(--tx3); border: 2px solid var(--brd2); }
+.step-dot.error { background: var(--red); color: #fff; }
+@keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.5 } }
+
+/* ── kv ── */
+.kv { display: flex; flex-direction: column; gap: 0; }
+.kv-row { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; padding: 7px 0; border-bottom: 1px solid var(--brd); }
+.kv-row:last-child { border-bottom: none; }
+.kv-k { font-weight: 600; color: var(--tx2); min-width: 140px; flex-shrink: 0; }
+.kv-v { color: var(--tx); flex: 1; }
+code.mono {
+  font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  font-size: 12px;
+  color: var(--teal);
+  background: var(--tealbg);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* ── tags ── */
+.tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.tag { padding: 2px 9px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+.tag-b { background: var(--bluebg2); color: var(--brand); }
+.tag-t { background: var(--tealbg2); color: var(--teal); }
+.tag-g { background: var(--greenbg); color: var(--green); }
+.tag-r { background: var(--redbg); color: var(--red); }
+.tag-o { background: var(--orabg); color: var(--ora); }
+.tag-y { background: var(--yelbg); color: var(--yel); }
+
+/* ── riscos ── */
+.risk-list { display: flex; flex-direction: column; gap: 8px; }
+.risk { padding: 12px 15px; border-radius: var(--r); border-left: 3px solid; font-size: 12px; }
+.risk.alta { background: var(--redbg); border-color: var(--red); }
+.risk.media { background: var(--orabg); border-color: var(--ora); }
+.risk.baixa { background: var(--yelbg); border-color: var(--yel); }
+.risk-sev { font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; }
+.risk-desc { font-weight: 600; color: var(--tx); line-height: 1.45; }
+.risk-fix { color: var(--tx2); margin-top: 5px; line-height: 1.45; }
+
+/* ── fluxo ── */
+.flow-list { display: flex; flex-direction: column; gap: 5px; }
+.flow-item { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; padding: 8px 10px; background: var(--sur2); border-radius: var(--r); line-height: 1.45; }
+.flow-n { width: 22px; height: 22px; border-radius: 50%; background: var(--brand); color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+
+/* ── código ── */
+.code-wrap { position: relative; margin-top: 4px; }
+.code-block {
+  background: #0f172a;
+  border-radius: var(--rl);
+  padding: 16px;
+  font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #e2e8f0;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 500px;
+  overflow-y: auto;
+}
+.code-copy {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255,255,255,.09);
+  border: 1px solid rgba(255,255,255,.15);
+  color: #e2e8f0;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: inherit;
+}
+.code-copy:hover { background: rgba(255,255,255,.18); }
+
+/* ── repos ── */
+.repo-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.repo-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 13px;
+  background: var(--sur2);
+  border: 1px solid var(--brd);
+  border-radius: var(--r);
+  font-size: 12px;
+}
+.repo-label { font-weight: 600; color: var(--tx2); min-width: 90px; flex-shrink: 0; }
+.repo-url { flex: 1; color: var(--brand); font-family: monospace; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.repo-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+.repo-badge.has-token { background: var(--greenbg); color: var(--green); }
+.repo-badge.no-token { background: var(--sur3); color: var(--tx3); }
+.repo-add-form {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  background: var(--bluebg);
+  border: 1px solid var(--brd2);
+  border-radius: var(--r);
+  margin-top: 6px;
+}
+.repo-add-form.open { display: flex; }
+.repo-add-row { display: grid; grid-template-columns: 130px 1fr 1fr; gap: 8px; }
+
+/* ── mermaid diagrams ── */
+.diag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.diag-card {
+  background: var(--sur);
+  border: 1px solid var(--brd);
+  border-radius: var(--rl);
+  overflow: hidden;
+  box-shadow: var(--sh);
+}
+.diag-header {
+  padding: 13px 16px 10px;
+  border-bottom: 1px solid var(--brd);
+  background: var(--sur2);
+}
+.diag-title { font-size: 13px; font-weight: 700; color: var(--brand); }
+.diag-desc { font-size: 11px; color: var(--tx3); margin-top: 2px; }
+.diag-body { padding: 16px; min-height: 120px; position: relative; overflow: auto; }
+.diag-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px;
+  color: var(--tx3);
+  font-size: 12px;
+}
+.diag-raw {
+  background: #0f172a;
+  border-radius: var(--r);
+  padding: 12px;
+  font-family: 'Cascadia Code', monospace;
+  font-size: 11px;
+  color: #94a3b8;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  max-height: 260px;
+  overflow-y: auto;
+}
+.diag-err {
+  font-size: 11px;
+  color: var(--red);
+  margin-bottom: 6px;
+  padding: 4px 8px;
+  background: var(--redbg);
+  border-radius: 4px;
+}
+.mermaid-target svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── chat ── */
+.chat-outer {
+  background: var(--sur);
+  border: 1px solid var(--brd);
+  border-radius: var(--rl);
+  overflow: hidden;
+  box-shadow: var(--sh);
+}
+.chat-body {
+  height: 420px;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--sur2);
+}
+.msg {
+  max-width: 84%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.55;
+  position: relative;
+}
+.msg.user {
+  background: var(--brand);
+  color: #fff;
+  align-self: flex-end;
+  border-radius: 14px 14px 2px 14px;
+}
+.msg.ai {
+  background: var(--sur);
+  border: 1px solid var(--brd);
+  align-self: flex-start;
+  border-radius: 14px 14px 14px 2px;
+  color: var(--tx);
+}
+.msg-ts { font-size: 10px; opacity: .5; margin-top: 4px; }
+.msg.user .msg-ts { text-align: right; }
+.typing-dots { display: inline-flex; gap: 4px; align-items: center; }
+.typing-dots span {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: tdot .9s ease infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay: .18s; }
+.typing-dots span:nth-child(3) { animation-delay: .36s; }
+@keyframes tdot { 0%,80%,100% { transform: scale(.7); opacity:.5 } 40% { transform: scale(1); opacity:1 } }
+.chat-footer {
+  padding: 10px 14px;
+  background: var(--sur);
+  border-top: 1px solid var(--brd);
+  display: flex;
+  gap: 8px;
+}
+.chat-input {
+  flex: 1;
+  padding: 9px 13px;
+  border: 1px solid var(--brd2);
+  border-radius: var(--r);
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--tx);
+  background: var(--sur);
+  transition: border-color .15s;
+}
+.chat-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
+
+/* ── markdown renderer ── */
+.md-h1 { font-size: 16px; font-weight: 800; color: var(--brand); margin: 10px 0 6px; }
+.md-h2 { font-size: 14px; font-weight: 700; color: var(--brand); margin: 8px 0 5px; }
+.md-h3 { font-size: 13px; font-weight: 700; color: var(--tx); margin: 6px 0 4px; border-bottom: 1px solid var(--brd); padding-bottom: 3px; }
+.md-p { margin: 4px 0; }
+.md-ul { padding-left: 18px; margin: 4px 0; }
+.md-ol { padding-left: 18px; margin: 4px 0; }
+.md-ul li, .md-ol li { margin: 2px 0; }
+.md-ic { font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 11.5px; background: var(--tealbg); color: var(--teal); padding: 1px 5px; border-radius: 4px; }
+.md-codeblock { margin: 8px 0; border-radius: var(--r); overflow: hidden; border: 1px solid var(--brd); }
+.md-lang { display: block; background: #1e293b; color: #64748b; font-size: 10px; font-weight: 700; padding: 4px 12px; letter-spacing: .05em; text-transform: uppercase; }
+.md-codeblock pre { background: #0f172a; color: #e2e8f0; padding: 12px; font-family: 'Cascadia Code', monospace; font-size: 11.5px; line-height: 1.7; overflow-x: auto; white-space: pre; }
+.md-codeblock code { background: none; color: inherit; padding: 0; font-size: inherit; }
+.md-hr { border: none; border-top: 1px solid var(--brd); margin: 10px 0; }
+
+/* ── alerts ── */
+.alert {
+  padding: 11px 15px;
+  border-radius: var(--r);
+  font-size: 13px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  line-height: 1.5;
+}
+.alert-info { background: var(--bluebg); color: var(--brand); border: 1px solid #bfdbfe; }
+.alert-ok { background: var(--greenbg); color: var(--green); border: 1px solid #bbf7d0; }
+.alert-warn { background: var(--orabg); color: var(--ora); border: 1px solid #fed7aa; }
+.alert-err { background: var(--redbg); color: var(--red); border: 1px solid #fecaca; }
+
+/* ── landing ── */
+.landing { max-width: 760px; margin: 52px auto; text-align: center; }
+.landing-icon { font-size: 56px; margin-bottom: 14px; }
+.landing h1 { font-size: 32px; font-weight: 900; color: var(--brand); letter-spacing: -.6px; }
+.landing p { font-size: 14px; color: var(--tx2); margin-top: 12px; line-height: 1.7; max-width: 520px; margin-inline: auto; }
+.feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 32px; text-align: left; }
+.feat-card { background: var(--sur); border: 1px solid var(--brd); border-radius: var(--rl); padding: 16px; box-shadow: var(--sh); transition: box-shadow .2s, transform .2s; }
+.feat-card:hover { box-shadow: var(--shm); transform: translateY(-2px); }
+.feat-card .fci { font-size: 24px; margin-bottom: 8px; }
+.feat-card h3 { font-size: 13px; font-weight: 700; color: var(--brand); }
+.feat-card p { font-size: 12px; color: var(--tx2); margin-top: 4px; line-height: 1.5; }
+
+/* ── modal ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+  backdrop-filter: blur(2px);
+}
+.modal {
+  background: var(--sur);
+  border-radius: var(--rl);
+  width: 100%;
+  max-width: 660px;
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: var(--shl);
+}
+.modal-hdr {
+  padding: 22px 26px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-hdr h3 { font-size: 16px; font-weight: 800; color: var(--brand); }
+.modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--tx3); padding: 4px 9px; border-radius: 5px; }
+.modal-close:hover { background: var(--sur2); color: var(--tx); }
+.modal-body { padding: 18px 26px 26px; }
+
+/* ── misc ── */
+.empty { text-align: center; padding: 48px 20px; color: var(--tx3); }
+.empty .ei { font-size: 38px; margin-bottom: 10px; }
+.empty p { font-size: 13px; }
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  vertical-align: middle;
+}
+.spinner.dark { border-color: rgba(30,58,138,.2); border-top-color: var(--brand); }
+@keyframes spin { to { transform: rotate(360deg) } }
+.divider { height: 1px; background: var(--brd); margin: 18px 0; }
+.section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--tx3); margin-bottom: 8px; }
+.status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 700; }
+.status-pill.done { background: var(--greenbg); color: var(--green); }
+.status-pill.error { background: var(--redbg); color: var(--red); }
+.status-pill.processing { background: var(--bluebg2); color: var(--brand); }
+.status-pill.draft { background: var(--sur2); color: var(--tx2); }
+
+/* ── topology ── */
+.topo-nodes { display: flex; align-items: center; gap: 0; flex-wrap: wrap; margin: 10px 0; }
+.topo-node { background: var(--bluebg2); color: var(--brand); border: 1px solid var(--accent); border-radius: var(--r); padding: 7px 14px; font-size: 12px; font-weight: 700; }
+.topo-arrow { color: var(--tx3); font-size: 18px; margin: 0 6px; }
+.topo-node.dest { background: var(--tealbg2); color: var(--teal); border-color: var(--teal); }
+.topo-node.router { background: var(--yelbg); color: var(--yel); border-color: var(--yel); }
+
+@media(max-width:900px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; }
+  .card-grid, .diag-grid, .feat-grid, .frow { grid-template-columns: 1fr; }
+  .repo-add-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sb">
+  <div class="sb-header">
+    <div class="sb-logo">CH8 <span>Hub Build AI</span></div>
+    <div class="sb-sub">Plataforma de ingestão e geração por IA</div>
+  </div>
+  <button class="sb-new" onclick="openNewModal()"><span>＋</span> Novo Projeto</button>
+  <div class="sb-sec">Projetos</div>
+  <div class="sb-list" id="sb-list">
+    <div class="empty" style="padding:16px 10px">
+      <div class="ei">📂</div>
+      <p style="font-size:11px;color:rgba(255,255,255,.3)">Nenhum projeto</p>
+    </div>
+  </div>
+  <div class="sb-bottom">CH8 Hub Build AI · Hatpkg TAquino 1.1 · porta 8901</div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:8px;min-width:0">
+      <span class="tb-title" id="tb-title">CH8 Hub Build AI</span>
+      <span class="tb-sep" id="tb-sep" style="display:none">·</span>
+      <span class="tb-sub" id="tb-sub" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+    </div>
+    <div class="tb-right" id="tb-right"></div>
+  </header>
+  <div class="content" id="content">
+    <div class="landing" id="landing">
+      <div class="landing-icon">🏗️</div>
+      <h1>CH8 Hub Build AI</h1>
+      <p>Faça upload de documentos, código, transcrições e imagens. O <strong>Hatpkg TAquino 1.1</strong> processa tudo e gera metadados, análise técnica, code review, contingência e diagramas C1-C4.</p>
+      <div class="feat-grid">
+        <div class="feat-card"><div class="fci">📄</div><h3>Documentos</h3><p>PDF, DOCX, TXT, YAML, XSLT, XSD, WSDL — extração automática</p></div>
+        <div class="feat-card"><div class="fci">☕</div><h3>Código-fonte</h3><p>Java, XML, Python, Shell — rotas Camel, beans e configmaps</p></div>
+        <div class="feat-card"><div class="fci">🖼️</div><h3>Imagens & Diagramas</h3><p>Capturas de tela e fluxogramas interpretados visualmente</p></div>
+        <div class="feat-card"><div class="fci">🔗</div><h3>Múltiplos Repositórios</h3><p>Azure DevOps ou GitHub com label e token por repositório</p></div>
+        <div class="feat-card"><div class="fci">💬</div><h3>Prompts & Transcrições</h3><p>Contexto textual livre, atas de reunião, explicações</p></div>
+        <div class="feat-card"><div class="fci">🤖</div><h3>Hatpkg TAquino 1.1</h3><p>Extrai metadados, riscos, contingência, code review e diagramas Mermaid C1-C4</p></div>
+      </div>
+      <button class="btn btn-primary btn-lg" style="margin-top:32px" onclick="openNewModal()">＋ Criar Primeiro Projeto</button>
+    </div>
+    <div id="pview" style="display:none"></div>
+  </div>
+</main>
+</div>
+
+<!-- Modal novo projeto -->
+<div class="overlay" id="new-modal" style="display:none" onclick="if(event.target===this)closeNewModal()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3>✨ Novo Projeto de Integração</h3>
+      <button class="modal-close" onclick="closeNewModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="frow">
+        <div class="fg"><label>Nome do Projeto *</label><input id="nm-name" placeholder="ex: Análise cm20080014-10p — GPV Portos Quality"></div>
+        <div class="fg"><label>Global ID (opcional — a IA detecta)</label><input id="nm-gid" placeholder="ex: cm20080014-10p-valenet"></div>
+      </div>
+      <div class="fg">
+        <label>Contexto / Descrição</label>
+        <textarea id="nm-desc" rows="3" placeholder="Descreva a integração: sistemas, operação, ambiente, stack, observações"></textarea>
+      </div>
+      <div class="fg">
+        <label>Prompt / Instruções adicionais para a IA</label>
+        <textarea id="nm-prompt" rows="2" placeholder="Ex: Foco na chave de roteamento da variante Portos; confirmar campo DestinationPlant"></textarea>
+      </div>
+      <div class="frow" style="margin-top:4px">
+        <div class="fg"><label>URL do Repositório (opcional)</label><input id="nm-url" placeholder="https://dev.azure.com/vale/..."></div>
+        <div class="fg"><label>Token PAT (opcional)</label><input type="password" id="nm-tok" placeholder="ghp_... ou PAT Azure DevOps"></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px">
+        <button class="btn btn-ghost" onclick="closeNewModal()">Cancelar</button>
+        <button class="btn btn-primary" id="nm-btn" onclick="createProject()">Criar Projeto →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Mermaid init ──────────────────────────────────────────────────────────────
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  themeVariables: {
+    primaryColor: '#dbeafe',
+    primaryTextColor: '#1e3a8a',
+    primaryBorderColor: '#3b82f6',
+    lineColor: '#94a3b8',
+    secondaryColor: '#ccfbf1',
+    tertiaryColor: '#f0fdf4',
+    background: '#ffffff',
+    mainBkg: '#eff6ff',
+    nodeBorder: '#3b82f6',
+    clusterBkg: '#f1f5f9',
+    titleColor: '#1e3a8a',
+    edgeLabelBackground: '#f8fafc',
+    fontFamily: 'Segoe UI, system-ui, sans-serif',
+    fontSize: '13px',
+  }
+});
+
+let _mermaidCounter = 0;
+async function renderDiagram(containerEl, code) {
+  if (!code || !code.trim()) {
+    containerEl.innerHTML = '<div class="diag-err">Sem código Mermaid</div>';
+    return;
+  }
+  _mermaidCounter++;
+  const id = 'mermaid-' + _mermaidCounter;
+  try {
+    const { svg } = await mermaid.render(id, code.trim());
+    containerEl.innerHTML = svg;
+  } catch (err) {
+    containerEl.innerHTML = `<div class="diag-err">Falha ao renderizar: ${x(String(err).slice(0,120))}</div><pre class="diag-raw">${x(code)}</pre>`;
+  }
+}
+
+// ── Markdown renderer ─────────────────────────────────────────────────────────
+function renderMd(text) {
+  if (!text) return '';
+  let html = '';
+  // code blocks
+  text = text.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
+    const langLabel = lang ? `<span class="md-lang">${x(lang)}</span>` : '';
+    return `<div class="md-codeblock">${langLabel}<pre><code>${x(code.replace(/\n$/, ''))}</code></pre></div>`;
+  });
+  // inline code
+  text = text.replace(/`([^`]+)`/g, (_, c) => `<code class="md-ic">${x(c)}</code>`);
+  // bold+italic (***), bold (**), italic (*)
+  text = text.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+  text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  // hr
+  text = text.replace(/^---+$/gm, '<hr class="md-hr">');
+  // headers
+  text = text.replace(/^### (.+)$/gm, '<div class="md-h3">$1</div>');
+  text = text.replace(/^## (.+)$/gm, '<div class="md-h2">$1</div>');
+  text = text.replace(/^# (.+)$/gm, '<div class="md-h1">$1</div>');
+
+  // split into blocks for list processing
+  const lines = text.split('\n');
+  let out = [];
+  let inUl = false, inOl = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const ulm = line.match(/^[\-\*] (.+)/);
+    const olm = line.match(/^\d+\. (.+)/);
+
+    if (ulm) {
+      if (!inUl) { if (inOl) { out.push('</ol>'); inOl = false; } out.push('<ul class="md-ul">'); inUl = true; }
+      out.push(`<li>${ulm[1]}</li>`);
+    } else if (olm) {
+      if (!inOl) { if (inUl) { out.push('</ul>'); inUl = false; } out.push('<ol class="md-ol">'); inOl = true; }
+      out.push(`<li>${olm[1]}</li>`);
+    } else {
+      if (inUl) { out.push('</ul>'); inUl = false; }
+      if (inOl) { out.push('</ol>'); inOl = false; }
+      if (line.trim() === '') {
+        if (out.length && out[out.length-1] !== '<br>') out.push('<br>');
+      } else {
+        out.push(`<span class="md-p">${line}</span><br>`);
+      }
+    }
+  }
+  if (inUl) out.push('</ul>');
+  if (inOl) out.push('</ol>');
+
+  return out.join('\n');
+}
+
+// ── estado global ─────────────────────────────────────────────────────────────
+let CUR = null;
+let POLL = null;
+let HIST = [];
+let ATAB = null;
+let DIAG_RENDERED = false;
+
+// ── boot ──────────────────────────────────────────────────────────────────────
+addEventListener('DOMContentLoaded', () => reloadSidebar());
+
+// ── sidebar ───────────────────────────────────────────────────────────────────
+async function reloadSidebar() {
+  const list = await fetch('/api/projects').then(r => r.json());
+  const el = document.getElementById('sb-list');
+  if (!list.length) {
+    el.innerHTML = '<div class="empty" style="padding:14px 10px"><div class="ei">📂</div><p style="font-size:11px;color:rgba(255,255,255,.3)">Nenhum projeto ainda</p></div>';
+    return;
+  }
+  el.innerHTML = list.map(p => `
+    <div class="sb-item ${p.id===CUR?'active':''}" onclick="openProject('${p.id}')">
+      <div class="sb-icon">${sIcon(p.status)}</div>
+      <div class="sb-info">
+        <div class="sb-name">${x(p.name)}</div>
+        <div class="sb-meta">${x(p.global_id||'—')} · ${p.files_count} arq</div>
+      </div>
+      <span class="sb-badge ${p.status}">${p.status}</span>
+    </div>`).join('');
+}
+
+function sIcon(s) { return {done:'✅',error:'❌',processing:'⚙️',draft:'📋'}[s]||'📋'; }
+
+// ── modal novo projeto ────────────────────────────────────────────────────────
+function openNewModal() {
+  document.getElementById('new-modal').style.display = 'flex';
+  setTimeout(() => document.getElementById('nm-name').focus(), 60);
+}
+function closeNewModal() { document.getElementById('new-modal').style.display = 'none'; }
+
+async function createProject() {
+  const name = document.getElementById('nm-name').value.trim();
+  if (!name) { alert('Informe o nome do projeto'); return; }
+  const fd = new FormData();
+  fd.append('name',        name);
+  fd.append('description', document.getElementById('nm-desc').value);
+  fd.append('prompt',      document.getElementById('nm-prompt').value);
+  fd.append('repo_url',    document.getElementById('nm-url').value);
+  fd.append('repo_token',  document.getElementById('nm-tok').value);
+  const btn = document.getElementById('nm-btn');
+  btn.disabled = true; btn.textContent = 'Criando...';
+  const p = await fetch('/api/projects', {method:'POST', body:fd}).then(r => r.json());
+  closeNewModal();
+  ['nm-name','nm-gid','nm-desc','nm-prompt','nm-url','nm-tok'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  btn.disabled = false; btn.textContent = 'Criar Projeto →';
+  await reloadSidebar();
+  openProject(p.id);
+}
+
+// ── abrir projeto ─────────────────────────────────────────────────────────────
+async function openProject(pid) {
+  CUR = pid; HIST = []; DIAG_RENDERED = false;
+  clearInterval(POLL);
+  await reloadSidebar();
+  const proj = await fetch(`/api/projects/${pid}`).then(r => r.json());
+  renderProject(proj);
+  if (proj.status === 'processing') startPoll();
+}
+
+function showLanding() {
+  CUR = null;
+  clearInterval(POLL);
+  document.getElementById('landing').style.display = '';
+  document.getElementById('pview').style.display = 'none';
+  document.getElementById('tb-title').textContent = 'CH8 Hub Build AI';
+  document.getElementById('tb-sep').style.display = 'none';
+  document.getElementById('tb-sub').textContent = '';
+  document.getElementById('tb-right').innerHTML = '';
+  reloadSidebar();
+}
+
+// ── renderizar projeto ────────────────────────────────────────────────────────
+function renderProject(proj) {
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('pview').style.display = '';
+  document.getElementById('tb-title').textContent = proj.name;
+  document.getElementById('tb-sep').style.display = '';
+  const sub = proj.meta?.global_id ? `${proj.meta.global_id} · ${proj.meta.operacao||''}` : 'Novo projeto';
+  document.getElementById('tb-sub').textContent = sub;
+  document.getElementById('tb-right').innerHTML = `
+    <span class="status-pill ${proj.status}">${sIcon(proj.status)} ${proj.status}</span>
+    <button class="btn btn-ghost btn-sm" onclick="openProject('${proj.id}')">↺</button>
+    <button class="btn btn-danger btn-sm" onclick="delProject('${proj.id}')">🗑</button>`;
+
+  const done    = proj.status === 'done';
+  const hasCont = !!proj.contingency?.branch_name;
+  const hasCR   = !!(proj.code_review?.qualidade || proj.code_review?.resumo);
+  const hasDiag = !!(proj.diagrams?.c1 || proj.diagrams?.c1_context);
+
+  const tabs = [
+    {id:'t-cfg',    lbl:'⚙️ Configurar',       on:true},
+    {id:'t-files',  lbl:'📁 Arquivos',          on:true},
+    {id:'t-proc',   lbl:'🤖 Processar',         on:true},
+    {id:'t-res',    lbl:'📊 Resultado',         on:done},
+    {id:'t-branch', lbl:'🔀 Branch & Código',   on:hasCont},
+    {id:'t-code',   lbl:'🔍 Code Review',       on:hasCR},
+    {id:'t-diag',   lbl:'📐 Diagramas C1-C4',   on:hasDiag},
+    {id:'t-chat',   lbl:'💬 Chat IA',           on:true},
+    {id:'t-exp',    lbl:'📤 Exportar',          on:done},
+  ];
+
+  const firstOn = ATAB || tabs.find(t => t.on)?.id || 't-cfg';
+  ATAB = null;
+
+  const tabBar = tabs.map(t => `
+    <button class="tbt ${firstOn===t.id?'active':''} ${!t.on?'locked':''}"
+      onclick="${t.on?`swTab('${t.id}')`:''}">${t.lbl}</button>`).join('');
+
+  const pview = document.getElementById('pview');
+  pview.innerHTML = `
+    <div class="tabs">${tabBar}</div>
+    <div id="t-cfg"    class="tp ${firstOn==='t-cfg'?'active':''}">${renderCfg(proj)}</div>
+    <div id="t-files"  class="tp ${firstOn==='t-files'?'active':''}">${renderFiles(proj)}</div>
+    <div id="t-proc"   class="tp ${firstOn==='t-proc'?'active':''}">${renderProc(proj)}</div>
+    <div id="t-res"    class="tp ${firstOn==='t-res'?'active':''}">${renderResult(proj)}</div>
+    <div id="t-branch" class="tp ${firstOn==='t-branch'?'active':''}">${renderBranch(proj)}</div>
+    <div id="t-code"   class="tp ${firstOn==='t-code'?'active':''}">${renderCodeReview(proj)}</div>
+    <div id="t-diag"   class="tp ${firstOn==='t-diag'?'active':''}">${renderDiagTab(proj)}</div>
+    <div id="t-chat"   class="tp ${firstOn==='t-chat'?'active':''}">${renderChat(proj)}</div>
+    <div id="t-exp"    class="tp ${firstOn==='t-exp'?'active':''}">${renderExport(proj)}</div>`;
+
+  setupDropzone(proj.id);
+  if (document.getElementById('t-files')?.classList.contains('active')) loadFileList(proj.id);
+  if (document.getElementById('t-diag')?.classList.contains('active')) scheduleDiagramRender(proj);
+  loadRepoList(proj.id);
+}
+
+function swTab(id) {
+  document.querySelectorAll('.tbt').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tp').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.tbt[onclick="swTab('${id}')"]`)?.classList.add('active');
+  const panel = document.getElementById(id);
+  panel?.classList.add('active');
+  if (id === 't-files') loadFileList(CUR);
+  if (id === 't-code')  { /* code_review already loaded in proj */ }
+  if (id === 't-diag' && !DIAG_RENDERED) {
+    fetch(`/api/projects/${CUR}`).then(r => r.json()).then(proj => scheduleDiagramRender(proj));
+  }
+}
+
+function swSub(panelId, id) {
+  const panel = document.getElementById(panelId);
+  if (!panel) return;
+  panel.querySelectorAll('.stbt').forEach(b => b.classList.remove('active'));
+  panel.querySelectorAll('.stp').forEach(p => p.classList.remove('active'));
+  panel.querySelector(`.stbt[data-sub="${id}"]`)?.classList.add('active');
+  panel.querySelector(`.stp[data-sub="${id}"]`)?.classList.add('active');
+}
+
+// ── tab Configurar ────────────────────────────────────────────────────────────
+function renderCfg(proj) {
+  return `
+  <div class="card">
+    <div class="card-h">📋 Informações do Projeto</div>
+    <div class="frow">
+      <div class="fg"><label>Nome</label><input id="c-name" value="${x(proj.name)}"></div>
+      <div class="fg"><label>Global ID (a IA detecta se vazio)</label><input id="c-gid" value="${x(proj.meta?.global_id||'')}" placeholder="ex: cm20080014-10p-valenet"></div>
+    </div>
+    <div class="fg">
+      <label>Contexto / Descrição</label>
+      <textarea id="c-desc" rows="3" placeholder="Sistemas origem/destino, operação, ambiente, stack...">${x(proj.description||'')}</textarea>
+    </div>
+    <div class="fg">
+      <label>Prompt / Instruções adicionais para a IA</label>
+      <textarea id="c-prompt" rows="3" placeholder="Transcrições, notas de reunião, foco da análise, observações sobre o campo de roteamento...">${x(proj.prompt||'')}</textarea>
+      <span class="hint">Cole transcrições de reuniões, atas, e-mails ou qualquer contexto que ajude a IA a entender a integração.</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h">🔗 Repositórios (opcional)</div>
+    <div class="repo-list" id="repo-list">
+      <div style="font-size:12px;color:var(--tx3);padding:8px 0">Carregando...</div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="toggleRepoForm()">＋ Adicionar Repositório</button>
+    <div class="repo-add-form" id="repo-add-form">
+      <div class="repo-add-row">
+        <div class="fg" style="margin:0"><label>Label</label><input id="radd-label" placeholder="ex: Camel Route"></div>
+        <div class="fg" style="margin:0"><label>URL</label><input id="radd-url" placeholder="https://dev.azure.com/org/..."></div>
+        <div class="fg" style="margin:0"><label>Token PAT</label><input type="password" id="radd-tok" placeholder="opcional"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary btn-sm" onclick="addRepo('${proj.id}')">Adicionar</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleRepoForm()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px">
+    <button class="btn btn-primary" onclick="saveCfg('${proj.id}')">💾 Salvar</button>
+    <button class="btn btn-ghost" onclick="swTab('t-files')">→ Próximo: Arquivos</button>
+  </div>`;
+}
+
+async function saveCfg(pid) {
+  const fd = new FormData();
+  fd.append('name',        document.getElementById('c-name')?.value||'');
+  fd.append('description', document.getElementById('c-desc')?.value||'');
+  fd.append('prompt',      document.getElementById('c-prompt')?.value||'');
+  await fetch(`/api/projects/${pid}`, {method:'PATCH', body:fd});
+  toast('Configurações salvas');
+  reloadSidebar();
+}
+
+function toggleRepoForm() {
+  const f = document.getElementById('repo-add-form');
+  if (!f) return;
+  f.classList.toggle('open');
+  if (f.classList.contains('open')) document.getElementById('radd-label')?.focus();
+}
+
+async function loadRepoList(pid) {
+  const el = document.getElementById('repo-list');
+  if (!el) return;
+  const repos = await fetch(`/api/projects/${pid}/repos`).then(r => r.json()).catch(() => []);
+  if (!repos.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--tx3);padding:4px 0">Nenhum repositório adicionado.</div>';
+    return;
+  }
+  el.innerHTML = repos.map((r, i) => `
+    <div class="repo-row">
+      <span class="repo-label">${x(r.label||'Repositório '+(i+1))}</span>
+      <span class="repo-url" title="${x(r.url)}">${x(r.url||'—')}</span>
+      <span class="repo-badge ${r.token?'has-token':'no-token'}">${r.token?'token ok':'sem token'}</span>
+      <button class="fi-del" onclick="removeRepo('${pid}',${i})" title="Remover">✕</button>
+    </div>`).join('');
+}
+
+async function addRepo(pid) {
+  const label = document.getElementById('radd-label')?.value.trim()||'';
+  const url   = document.getElementById('radd-url')?.value.trim()||'';
+  const token = document.getElementById('radd-tok')?.value.trim()||'';
+  if (!url) { alert('Informe a URL do repositório'); return; }
+  await fetch(`/api/projects/${pid}/repos`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({label, url, token})
+  });
+  document.getElementById('radd-label').value = '';
+  document.getElementById('radd-url').value   = '';
+  document.getElementById('radd-tok').value   = '';
+  document.getElementById('repo-add-form')?.classList.remove('open');
+  loadRepoList(pid);
+  toast('Repositório adicionado');
+}
+
+async function removeRepo(pid, idx) {
+  await fetch(`/api/projects/${pid}/repos/${idx}`, {method:'DELETE'});
+  loadRepoList(pid);
+  toast('Repositório removido');
+}
+
+// ── tab Arquivos ──────────────────────────────────────────────────────────────
+function renderFiles(proj) {
+  return `
+  <div class="card">
+    <div class="card-h">📁 Arquivos de Entrada</div>
+    <div class="alert alert-info">Aceitos: PDF · DOCX · TXT · MD · Java · XML · XSLT · XSD · WSDL · YAML · JSON · PNG · JPG · Python · Shell · Groovy</div>
+    <div class="dropzone" id="dz" onclick="document.getElementById('fi').click()">
+      <div class="dz-icon">📂</div>
+      <h4>Arraste arquivos ou clique para selecionar</h4>
+      <p>Múltiplos arquivos · Máx 50 MB cada</p>
+    </div>
+    <input type="file" id="fi" multiple style="display:none" onchange="uploadFiles(event,'${proj.id}')">
+    <div id="fl" class="file-list"></div>
+    <div id="fst" style="margin-top:8px"></div>
+  </div>
+  <button class="btn btn-ghost" onclick="swTab('t-proc')">→ Próximo: Processar</button>`;
+}
+
+function setupDropzone(pid) {
+  const dz = document.getElementById('dz');
+  if (!dz) return;
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+  dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); if(e.dataTransfer.files.length) doUpload(e.dataTransfer.files, pid); });
+  loadFileList(pid);
+}
+
+async function loadFileList(pid) {
+  const el = document.getElementById('fl');
+  if (!el || !pid) return;
+  const files = await fetch(`/api/projects/${pid}/files`).then(r => r.json());
+  if (!files.length) { el.innerHTML = '<div class="empty" style="padding:12px"><div class="ei">📄</div><p>Nenhum arquivo ainda</p></div>'; return; }
+  el.innerHTML = files.map(f => `
+    <div class="fi">
+      <span class="fi-icon">${fIcon(f.ext)}</span>
+      <span class="fi-name">${x(f.name)}</span>
+      <span class="fi-size">${fmtSz(f.size)}</span>
+      <button class="fi-del" onclick="delFile('${pid}','${f.name}')">✕</button>
+    </div>`).join('');
+}
+
+function fIcon(e) { return {pdf:'📕',docx:'📘',doc:'📘',txt:'📄',md:'📝',java:'☕',xml:'🔧',yaml:'⚙️',yml:'⚙️',xslt:'🔀',xsd:'📐',wsdl:'🌐',png:'🖼️',jpg:'🖼️',jpeg:'🖼️',py:'🐍',sh:'💲',json:'📋',groovy:'☕',properties:'📋',ts:'🔷',js:'🟨'}[e]||'📄'; }
+function fmtSz(b) { if(b<1024)return b+' B'; if(b<1048576)return(b/1024).toFixed(1)+' KB'; return(b/1048576).toFixed(1)+' MB'; }
+
+async function uploadFiles(e, pid) { if(e.target.files.length) await doUpload(e.target.files, pid); e.target.value = ''; }
+async function doUpload(files, pid) {
+  const st = document.getElementById('fst');
+  if(st) st.innerHTML = '<div class="alert alert-info"><span class="spinner"></span> Enviando...</div>';
+  const fd = new FormData();
+  for(const f of files) fd.append('files', f);
+  const res = await fetch(`/api/projects/${pid}/files`, {method:'POST', body:fd}).then(r => r.json());
+  if(st) st.innerHTML = `<div class="alert alert-ok">✅ ${res.uploaded} arquivo(s) enviado(s)</div>`;
+  setTimeout(() => { if(st) st.innerHTML = ''; }, 3000);
+  loadFileList(pid); reloadSidebar();
+}
+
+async function delFile(pid, name) {
+  await fetch(`/api/projects/${pid}/files/${encodeURIComponent(name)}`, {method:'DELETE'});
+  loadFileList(pid); reloadSidebar();
+}
+
+// ── tab Processar ─────────────────────────────────────────────────────────────
+function renderProc(proj) {
+  const s   = proj.status;
+  const pr  = proj.processing||{};
+  const pct = pr.pct||0;
+  const done = s==='done', err = s==='error', proc = s==='processing';
+
+  const steps = [
+    {key:'extract',     lbl:'1. Extrair metadados da integração',       from:3,  to:25},
+    {key:'analysis',    lbl:'2. Análise técnica completa + riscos',      from:25, to:55},
+    {key:'contingency', lbl:'3. Gerar RoutingBean + Camel + ConfigMap',  from:55, to:65},
+    {key:'code_review', lbl:'4. Code Review: segurança, bugs, insights', from:65, to:85},
+    {key:'diagrams',    lbl:'5. Criar diagramas Mermaid C1-C4',          from:85, to:100},
+  ];
+  function dotState(st) {
+    if (done) return 'done';
+    if (err && pr.step===st.key) return 'error';
+    if (proc && pr.step===st.key) return 'active';
+    if (pct >= st.to)   return 'done';
+    if (pct > st.from)  return 'active';
+    return 'pending';
+  }
+  const stepHtml = steps.map(st => {
+    const ds = dotState(st);
+    return `<div class="step-row"><div class="step-dot ${ds}">${ds==='done'?'✓':ds==='active'?'●':ds==='error'?'!':'○'}</div><span style="color:${ds==='pending'?'var(--tx3)':'var(--tx)'}">${st.lbl}</span></div>`;
+  }).join('');
+
+  const mainBtn = done
+    ? `<button class="btn btn-teal btn-lg" onclick="swTab('t-res')">📊 Ver Resultado Completo →</button>`
+    : `<button class="btn btn-primary btn-lg" onclick="startProc('${proj.id}')"${proc?' disabled':''}>🚀 ${proc?'Processando...':'Iniciar Processamento'}</button>`;
+
+  const rerunBtns = done ? `
+    <div class="divider"></div>
+    <div class="section-label">Reprocessar passo individual</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" onclick="rerun('${proj.id}','extract')">↺ Metadados</button>
+      <button class="btn btn-ghost btn-sm" onclick="rerun('${proj.id}','analysis')">↺ Análise</button>
+      <button class="btn btn-ghost btn-sm" onclick="rerun('${proj.id}','contingency')">↺ Contingência</button>
+      <button class="btn btn-ghost btn-sm" onclick="rerun('${proj.id}','diagrams')">↺ Diagramas</button>
+      <button class="btn btn-ghost btn-sm" onclick="rerun('${proj.id}','all')">↺ Tudo</button>
+    </div>` : '';
+
+  return `
+  <div class="card">
+    <div class="card-h">${done?'✅':err?'❌':proc?'⚙️':'🤖'} ${done?'Pipeline Concluído!':err?'Erro no Processamento':proc?'Processando...':'Pronto para Processar'}</div>
+    ${err?`<div class="alert alert-err">${x(pr.msg||'Erro desconhecido')}</div>`:''}
+    ${done?`<div class="alert alert-ok">✅ ${x(pr.msg||'Análise concluída com sucesso!')} <span style="color:var(--tx3);font-size:11px">${pr.ts||''}</span></div>`:''}
+    <div class="prog-wrap"><div class="prog-bar" id="pb" style="width:${pct}%"></div></div>
+    <div style="font-size:12px;color:var(--tx2);margin-bottom:4px">${pct}% · ${x(pr.msg||'Aguardando')}</div>
+    <div class="steps-list">${stepHtml}</div>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">${mainBtn}</div>
+  ${rerunBtns}`;
+}
+
+async function startProc(pid) {
+  await fetch(`/api/projects/${pid}/process`, {method:'POST'});
+  ATAB = 't-proc';
+  openProject(pid);
+  startPoll();
+}
+
+async function rerun(pid, step) {
+  await fetch(`/api/projects/${pid}/rerun/${step}`, {method:'POST'});
+  ATAB = 't-proc';
+  openProject(pid);
+  startPoll();
+}
+
+function startPoll() {
+  clearInterval(POLL);
+  POLL = setInterval(async () => {
+    const s = await fetch(`/api/projects/${CUR}/status`).then(r => r.json());
+    const tp = document.getElementById('t-proc');
+    if (tp?.classList.contains('active')) {
+      const proj = await fetch(`/api/projects/${CUR}`).then(r => r.json());
+      tp.innerHTML = renderProc(proj);
+    }
+    if (s.status !== 'processing') {
+      clearInterval(POLL);
+      ATAB = 't-proc';
+      const proj = await fetch(`/api/projects/${CUR}`).then(r => r.json());
+      renderProject(proj);
+      reloadSidebar();
+    }
+  }, 2500);
+}
+
+// ── tab Resultado ─────────────────────────────────────────────────────────────
+function renderResult(proj) {
+  const m = proj.meta||{}, a = proj.analysis||{};
+  if (!m.global_id) return emptyState('📊', 'Processe o projeto primeiro para ver o resultado.');
+
+  const cr    = a.chave_roteamento||{};
+  const risks = a.riscos||[];
+  const riskH = risks.length ? risks.map(r => `
+    <div class="risk ${r.sev||'baixa'}">
+      <div class="risk-sev">${r.sev==='alta'?'🔴':r.sev==='media'?'🟠':'🟡'} ${r.sev}</div>
+      <div class="risk-desc">${x(r.desc)}</div>
+      <div class="risk-fix">💡 ${x(r.fix)}</div>
+    </div>`).join('') : '<p style="font-size:12px;color:var(--tx3)">Nenhum risco identificado</p>';
+
+  const flowH = (a.fluxo||[]).map((f,i) => `
+    <div class="flow-item"><div class="flow-n">${i+1}</div><span>${x(f)}</span></div>`).join('');
+
+  const camposH = (a.campos_entrada||[]).map(c => `
+    <div class="kv-row">
+      <span class="kv-k"><code class="mono">${x(c.nome)}</code></span>
+      <span class="kv-v"><span class="tag ${c.obrigatorio?'tag-r':'tag-t'}">${c.obrigatorio?'obrigatório':'opcional'}</span> <span style="color:var(--tx2);font-size:11px">${x(c.tipo||'')}</span></span>
+    </div>`).join('');
+
+  const techH = (a.tecnologias||[]).map(t => `<span class="tag tag-b">${x(t)}</span>`).join('');
+  const origens = (m.sistemas_origem||[]).join(', ') || '?';
+
+  return `
+  <div class="subtabs" id="res-tabs">
+    <button class="stbt active" data-sub="overview" onclick="swSub('t-res','overview')">🔑 Visão Geral</button>
+    <button class="stbt" data-sub="flow" onclick="swSub('t-res','flow')">🔄 Fluxo</button>
+    <button class="stbt" data-sub="routing" onclick="swSub('t-res','routing')">🎯 Roteamento</button>
+    <button class="stbt" data-sub="risks" onclick="swSub('t-res','risks')">⚠️ Riscos (${risks.length})</button>
+    <button class="stbt" data-sub="fields" onclick="swSub('t-res','fields')">📥 Campos</button>
+    <button class="stbt" data-sub="monitor" onclick="swSub('t-res','monitor')">📊 Monitoramento</button>
+  </div>
+
+  <div class="stp active" data-sub="overview">
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-h">🔑 Identidade</div>
+        <div class="kv">
+          <div class="kv-row"><span class="kv-k">Global ID</span><span class="kv-v"><code class="mono">${x(m.global_id)}</code></span></div>
+          <div class="kv-row"><span class="kv-k">Família</span><span class="kv-v"><code class="mono">${x(m.familia_id||'—')}</code></span></div>
+          <div class="kv-row"><span class="kv-k">Nome</span><span class="kv-v">${x(m.nome||'—')}</span></div>
+          <div class="kv-row"><span class="kv-k">Operação</span><span class="kv-v">${x(m.operacao||'—')}</span></div>
+          <div class="kv-row"><span class="kv-k">Domínio</span><span class="kv-v">${x(m.dominio||'—')}</span></div>
+          <div class="kv-row"><span class="kv-k">Legs</span><span class="kv-v">${m.legs||2}</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h">🔌 Conectividade</div>
+        <div class="kv">
+          <div class="kv-row"><span class="kv-k">Origem</span><span class="kv-v">${x(origens)}</span></div>
+          <div class="kv-row"><span class="kv-k">Destino</span><span class="kv-v">${x((m.sistemas_destino||[]).join(', ')||'—')}</span></div>
+          <div class="kv-row"><span class="kv-k">Protocolo</span><span class="kv-v"><div class="tags">${(m.protocolo||[]).map(t=>`<span class="tag tag-b">${x(t)}</span>`).join('')||'—'}</div></span></div>
+          <div class="kv-row"><span class="kv-k">Sincronicidade</span><span class="kv-v">${x(m.sincronicidade||'—')}</span></div>
+          <div class="kv-row"><span class="kv-k">Padrão EIP</span><span class="kv-v"><div class="tags">${(m.padrao_eip||[]).map(t=>`<span class="tag tag-t">${x(t)}</span>`).join('')||'—'}</div></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h">📐 Topologia Visual</div>
+      <div class="topo-nodes">
+        ${(m.sistemas_origem||['Origem']).map(s=>`<div class="topo-node">${x(s)}</div>`).join('<div class="topo-arrow">→</div>')}
+        <div class="topo-arrow">→</div>
+        <div class="topo-node router">⚡ RoutingBean<br><small style="font-weight:400">${x(cr.campo||'?')}</small></div>
+        <div class="topo-arrow">→</div>
+        <div class="topo-node dest">SAP ECC</div>
+        <div class="topo-arrow">/</div>
+        <div class="topo-node dest">S/4HANA</div>
+      </div>
+      <p style="font-size:12px;color:var(--tx2);margin-top:10px">${x(a.resumo||m.descricao||'—')}</p>
+    </div>
+    ${techH?`<div class="card"><div class="card-h">🔧 Tecnologias</div><div class="tags">${techH}</div></div>`:''}
+  </div>
+
+  <div class="stp" data-sub="flow">
+    <div class="card">
+      <div class="card-h">🔄 Fluxo de Mensagens</div>
+      <div class="flow-list">${flowH||'<p style="font-size:12px;color:var(--tx3)">—</p>'}</div>
+    </div>
+  </div>
+
+  <div class="stp" data-sub="routing">
+    <div class="card">
+      <div class="card-h">🎯 Chave de Roteamento</div>
+      <div class="kv">
+        <div class="kv-row"><span class="kv-k">Campo principal</span><span class="kv-v"><code class="mono">${x(cr.campo||'—')}</code></span></div>
+        <div class="kv-row"><span class="kv-k">Campos compostos</span><span class="kv-v">${(cr.compostos||[]).join(', ')||'nenhum'}</span></div>
+        <div class="kv-row"><span class="kv-k">Localização</span><span class="kv-v">${x(cr.onde||'—')}</span></div>
+        <div class="kv-row"><span class="kv-k">Certeza</span><span class="kv-v"><span class="tag ${cr.certeza==='alta'?'tag-g':cr.certeza==='baixa'?'tag-r':'tag-y'}">${cr.certeza||'—'}</span></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stp" data-sub="risks">
+    <div class="card">
+      <div class="card-h">⚠️ Riscos Identificados</div>
+      <div class="risk-list">${riskH}</div>
+    </div>
+    ${(a.performance||[]).length?`
+    <div class="card">
+      <div class="card-h">⚡ Performance</div>
+      <div class="risk-list">${(a.performance||[]).map(p=>`
+        <div class="risk ${p.tipo==='gargalo'?'alta':'baixa'}">
+          <div class="risk-sev">${p.tipo}</div>
+          <div class="risk-desc">${x(p.desc)}</div>
+          <div class="risk-fix">💡 ${x(p.fix)}</div>
+        </div>`).join('')}
+      </div>
+    </div>`:''}
+  </div>
+
+  <div class="stp" data-sub="fields">
+    <div class="card">
+      <div class="card-h">📥 Campos de Entrada</div>
+      <div class="kv">${camposH||'<p style="font-size:12px;color:var(--tx3)">Nenhum campo mapeado</p>'}</div>
+    </div>
+    ${(a.mapeamentos||[]).length?`
+    <div class="card">
+      <div class="card-h">🔀 Mapeamentos &amp; Transformações</div>
+      <ul style="padding-left:16px">${(a.mapeamentos||[]).map(m=>`<li style="font-size:12px;margin-bottom:5px;color:var(--tx)">${x(m)}</li>`).join('')}</ul>
+    </div>`:''}
+  </div>
+
+  <div class="stp" data-sub="monitor">
+    <div class="card">
+      <div class="card-h">📊 Monitoramento &amp; Observabilidade</div>
+      <div class="kv">
+        <div class="kv-row"><span class="kv-k">Métricas</span><span class="kv-v"><div class="tags">${(a.monitoramento?.metricas||[]).map(t=>`<span class="tag tag-b">${x(t)}</span>`).join('')}</div></span></div>
+        <div class="kv-row"><span class="kv-k">Alertas</span><span class="kv-v"><ul style="padding-left:14px">${(a.monitoramento?.alertas||[]).map(al=>`<li style="font-size:12px;color:var(--tx2)">${x(al)}</li>`).join('')}</ul></span></div>
+        <div class="kv-row"><span class="kv-k">EHL / MDC</span><span class="kv-v"><code style="font-size:11px;font-family:monospace;color:var(--teal)">${x(a.monitoramento?.ehl||'—')}</code></span></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── tab Branch & Código ───────────────────────────────────────────────────────
+function renderBranch(proj) {
+  const c = proj.contingency||{};
+  if (!c.branch_name) return emptyState('🔀', 'Processe o projeto para gerar o código de contingência.');
+
+  const instrH = (c.instrucoes||[]).map((s,i) => `
+    <div class="flow-item"><div class="flow-n">${i+1}</div><span>${x(s)}</span></div>`).join('');
+
+  return `
+  <div class="subtabs" id="br-tabs">
+    <button class="stbt active" data-sub="br-branch" onclick="swSub('t-branch','br-branch')">🔀 Branch</button>
+    <button class="stbt" data-sub="br-bean" onclick="swSub('t-branch','br-bean')">☕ RoutingBean.java</button>
+    <button class="stbt" data-sub="br-camel" onclick="swSub('t-branch','br-camel')">🔄 Camel Route</button>
+    <button class="stbt" data-sub="br-cfg" onclick="swSub('t-branch','br-cfg')">⚙️ ConfigMap</button>
+  </div>
+
+  <div class="stp active" data-sub="br-branch">
+    <div class="card">
+      <div class="card-h">🔀 Branch de Contingência</div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+        <code class="mono" style="font-size:15px;font-weight:700">${x(c.branch_name)}</code>
+        <button class="btn btn-ghost btn-sm" onclick="cp('${x(c.branch_name)}')">📋 Copiar</button>
+      </div>
+      ${c.notas?`<div class="alert alert-info">${x(c.notas)}</div>`:''}
+      <div class="card-h" style="margin-top:8px">📋 Instruções</div>
+      <div class="flow-list">${instrH}</div>
+    </div>
+  </div>
+
+  <div class="stp" data-sub="br-bean">
+    <div class="card">
+      <div class="card-h">☕ RoutingBean.java</div>
+      <p style="font-size:12px;color:var(--tx2);margin-bottom:10px">Adicionar em <code class="mono">src/main/java/br/com/vale/fis/bean/RoutingBean.java</code></p>
+      <div class="code-wrap">
+        <div class="code-block" id="bean-code">${x(c.RoutingBean||'// Não gerado')}</div>
+        <button class="code-copy" onclick="cp(document.getElementById('bean-code').textContent)">📋 Copiar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stp" data-sub="br-camel">
+    <div class="card">
+      <div class="card-h">🔄 Camel Route Snippet</div>
+      <p style="font-size:12px;color:var(--tx2);margin-bottom:10px">Inserir na rota principal antes da fila destino SAP PI</p>
+      <div class="code-wrap">
+        <div class="code-block" id="camel-code">${x(c.camel_snippet||'// Não gerado')}</div>
+        <button class="code-copy" onclick="cp(document.getElementById('camel-code').textContent)">📋 Copiar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stp" data-sub="br-cfg">
+    <div class="card">
+      <div class="card-h">⚙️ ConfigMap Adicional (YAML)</div>
+      <p style="font-size:12px;color:var(--tx2);margin-bottom:10px">Adicionar em <code class="mono">configmaps-dev.yaml</code>, <code class="mono">configmaps-qa.yaml</code> e <code class="mono">configmaps-prd.yaml</code></p>
+      <div class="code-wrap">
+        <div class="code-block" id="cfg-code">${x(c.configmap_adicional||'# Não gerado')}</div>
+        <button class="code-copy" onclick="cp(document.getElementById('cfg-code').textContent)">📋 Copiar</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── tab Code Review ───────────────────────────────────────────────────────────
+function renderCodeReview(proj) {
+  const cr = proj.code_review || {};
+  if (!cr.resumo && !cr.qualidade) return emptyState('🔍', 'Processe o projeto para gerar o Code Review com IA.');
+
+  const q    = cr.qualidade   || {};
+  const arq  = cr.arquitetura || {};
+  const pred = cr.analise_preditiva || {};
+
+  const scoreColor = (n) => n >= 8 ? 'var(--green)' : n >= 6 ? 'var(--yel)' : 'var(--red)';
+  const nivelTag   = {'excelente':'tag-g','bom':'tag-g','regular':'tag-y','ruim':'tag-r'}[q.nivel] || 'tag-y';
+  const score      = q.score ?? '—';
+
+  const sugH = (cr.sugestoes_melhoria || []).map(s => `
+    <div class="risk ${s.prio||'baixa'}">
+      <div class="risk-sev">${s.prio==='alta'?'🔴':s.prio==='media'?'🟠':'🟡'} ${x(s.prio)} · ${x(s.titulo)}</div>
+      <div class="risk-desc">${x(s.desc)}</div>
+      <div class="risk-fix">💡 ${x(s.fix)}</div>
+    </div>`).join('') || '<p style="font-size:12px;color:var(--tx3)">Nenhuma sugestão identificada</p>';
+
+  const secH = (cr.riscos_seguranca || []).map(s => `
+    <div class="risk ${s.sev||'baixa'}">
+      <div class="risk-sev">${s.sev==='alta'?'🔴':s.sev==='media'?'🟠':'🟡'} ${x(s.sev)} — <code style="font-size:10px;font-family:monospace">${x(s.tipo||'')}</code></div>
+      <div class="risk-desc">${x(s.desc)}</div>
+      <div class="risk-fix">🔒 ${x(s.fix)}</div>
+    </div>`).join('') || '<div class="alert alert-ok">✅ Nenhum risco de segurança detectado</div>';
+
+  const bugsH = (pred.bugs || []).map(b => `
+    <div class="risk ${b.prob==='alta'?'alta':b.prob==='media'?'media':'baixa'}">
+      <div class="risk-sev">${b.prob==='alta'?'🔴':b.prob==='media'?'🟠':'🟡'} probabilidade ${x(b.prob)}</div>
+      <div class="risk-desc">${x(b.desc)}</div>
+      <div class="risk-fix">📍 ${x(b.loc||'—')}</div>
+    </div>`).join('') || '<p style="font-size:12px;color:var(--tx3)">Nenhum bug potencial detectado</p>';
+
+  const perfH = (pred.performance || []).map(p => `
+    <div class="risk ${p.impacto==='alto'?'alta':p.impacto==='medio'?'media':'baixa'}">
+      <div class="risk-sev">⚡ impacto ${x(p.impacto)}</div>
+      <div class="risk-desc">${x(p.desc)}</div>
+      <div class="risk-fix">💡 ${x(p.fix)}</div>
+    </div>`).join('') || '<p style="font-size:12px;color:var(--tx3)">Sem problemas de performance detectados</p>';
+
+  const insightsH = (cr.insights_ia || []).map(ins => `
+    <div class="flow-item">
+      <div class="flow-n">💡</div>
+      <span style="line-height:1.5">${x(ins)}</span>
+    </div>`).join('') || '<p style="font-size:12px;color:var(--tx3)">—</p>';
+
+  return `
+  <div class="subtabs" id="cr-tabs">
+    <button class="stbt active" data-sub="cr-overview" onclick="swSub('t-code','cr-overview')">📊 Visão Geral</button>
+    <button class="stbt" data-sub="cr-security"  onclick="swSub('t-code','cr-security')">🔒 Segurança (${(cr.riscos_seguranca||[]).length})</button>
+    <button class="stbt" data-sub="cr-suggest"   onclick="swSub('t-code','cr-suggest')">💡 Melhorias (${(cr.sugestoes_melhoria||[]).length})</button>
+    <button class="stbt" data-sub="cr-predictive" onclick="swSub('t-code','cr-predictive')">🔮 Análise Preditiva</button>
+    <button class="stbt" data-sub="cr-arch"      onclick="swSub('t-code','cr-arch')">🏗️ Arquitetura</button>
+  </div>
+
+  <!-- visão geral -->
+  <div class="stp active" data-sub="cr-overview">
+    ${!cr.has_code ? '<div class="alert alert-warn">⚠️ Código-fonte não disponível. Análise baseada no contexto da integração — adicione arquivos Java/XML para análise real.</div>' : ''}
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-h">📊 Score de Qualidade</div>
+        <div style="display:flex;align-items:center;gap:20px;margin-bottom:14px">
+          <div style="font-size:52px;font-weight:900;color:${scoreColor(score)};line-height:1">${score}<span style="font-size:20px;color:var(--tx3)">/10</span></div>
+          <div>
+            <span class="tag ${nivelTag}" style="font-size:13px;padding:4px 12px">${q.nivel||'—'}</span>
+            <div style="font-size:11px;color:var(--tx3);margin-top:6px">${(cr.linguagens||[]).join(' · ')||'—'}</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--tx2);line-height:1.6">${x(cr.resumo||'—')}</div>
+      </div>
+      <div class="card">
+        <div class="card-h">✅ Pontos Fortes</div>
+        <ul style="padding-left:16px;display:flex;flex-direction:column;gap:5px">
+          ${(q.pontos_fortes||['—']).map(p=>`<li style="font-size:12px;color:var(--green)">${x(p)}</li>`).join('')}
+        </ul>
+        <div class="card-h" style="margin-top:14px">❌ Pontos Fracos</div>
+        <ul style="padding-left:16px;display:flex;flex-direction:column;gap:5px">
+          ${(q.pontos_fracos||['—']).map(p=>`<li style="font-size:12px;color:var(--red)">${x(p)}</li>`).join('')}
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h">💡 Insights da IA</div>
+      <div class="flow-list">${insightsH}</div>
+    </div>
+  </div>
+
+  <!-- segurança -->
+  <div class="stp" data-sub="cr-security">
+    <div class="card">
+      <div class="card-h">🔒 Riscos de Segurança</div>
+      <div class="risk-list">${secH}</div>
+    </div>
+  </div>
+
+  <!-- melhorias -->
+  <div class="stp" data-sub="cr-suggest">
+    <div class="card">
+      <div class="card-h">💡 Sugestões de Melhoria</div>
+      <div class="risk-list">${sugH}</div>
+    </div>
+  </div>
+
+  <!-- preditiva -->
+  <div class="stp" data-sub="cr-predictive">
+    <div class="card">
+      <div class="card-h">🐛 Bugs Potenciais</div>
+      <div class="risk-list">${bugsH}</div>
+    </div>
+    <div class="card">
+      <div class="card-h">⚡ Performance</div>
+      <div class="risk-list">${perfH}</div>
+    </div>
+    ${pred.escalabilidade ? `
+    <div class="card">
+      <div class="card-h">📈 Escalabilidade</div>
+      <p style="font-size:13px;color:var(--tx);line-height:1.6">${x(pred.escalabilidade)}</p>
+    </div>` : ''}
+  </div>
+
+  <!-- arquitetura -->
+  <div class="stp" data-sub="cr-arch">
+    <div class="card">
+      <div class="card-h">🏗️ Arquitetura</div>
+      <div class="kv" style="margin-bottom:14px">
+        <div class="kv-row"><span class="kv-k">Padrões</span><span class="kv-v"><div class="tags">${(arq.padroes||[]).map(p=>`<span class="tag tag-b">${x(p)}</span>`).join('')||'—'}</div></span></div>
+        <div class="kv-row"><span class="kv-k">Estrutura</span><span class="kv-v">${x(arq.estrutura||'—')}</span></div>
+      </div>
+      ${(arq.componentes_principais||[]).length ? `
+      <div class="card-h">🔧 Componentes Principais</div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        ${(arq.componentes_principais||[]).map(c=>`
+          <div class="flow-item"><div class="flow-n">☕</div><span style="font-family:monospace;font-size:12px;color:var(--teal)">${x(c)}</span></div>
+        `).join('')}
+      </div>` : ''}
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn btn-ghost btn-sm" onclick="rerun('${proj.id}','code_review')">↺ Reanalisar código</button>
+    </div>
+  </div>`;
+}
+
+// ── tab Diagramas C1-C4 ───────────────────────────────────────────────────────
+function renderDiagTab(proj) {
+  const d = proj.diagrams||{};
+  // Suporta novo formato (c1,c2,c3,c4 com campo mermaid) e legado (c1_context etc.)
+  const hasNew = !!(d.c1);
+  const hasLeg = !!(d.c1_context);
+
+  if (!hasNew && !hasLeg) return emptyState('📐', 'Processe o projeto para gerar os diagramas C1-C4 em Mermaid.');
+
+  if (hasNew) {
+    const diagrams = [
+      {key:'c1', fallback:'C1 — Diagrama de Contexto'},
+      {key:'c2', fallback:'C2 — Containers'},
+      {key:'c3', fallback:'C3 — Componentes Internos'},
+      {key:'c4', fallback:'C4 — Fluxo de Execução'},
+    ];
+    return `
+    <div class="diag-grid" id="diag-grid">
+      ${diagrams.map(({key, fallback}) => {
+        const entry = d[key]||{};
+        return `
+        <div class="diag-card">
+          <div class="diag-header">
+            <div class="diag-title">${x(entry.title||fallback)}</div>
+            <div class="diag-desc">${x(entry.desc||'')}</div>
+          </div>
+          <div class="diag-body">
+            <div class="diag-loading" id="diag-loading-${key}"><span class="spinner dark"></span> Renderizando...</div>
+            <div class="mermaid-target" id="diag-target-${key}" style="display:none"></div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  // legado — formato antigo com arrays de texto
+  const cards = [
+    {key:'c1_context',    title:'C1 — Contexto',    field:'nodes'},
+    {key:'c2_containers', title:'C2 — Containers',  field:'containers'},
+    {key:'c3_components', title:'C3 — Componentes', field:'components'},
+    {key:'c4_code',       title:'C4 — Código',      field:'steps'},
+  ];
+  return `<div class="diag-grid">
+    ${cards.map(({key, title, field}) => {
+      const c = d[key]||{};
+      const items = c[field]||[];
+      const flows = c.flows||c.key_classes||[];
+      return `<div class="diag-card">
+        <div class="diag-header">
+          <div class="diag-title">${x(c.title||title)}</div>
+          <div class="diag-desc">${x(c.description||'')}</div>
+        </div>
+        <div class="diag-body">
+          ${items.length?`<ul style="padding-left:14px;margin-bottom:8px">${items.map(n=>`<li style="font-size:12px;margin-bottom:4px;color:var(--tx)">${x(n)}</li>`).join('')}</ul>`:''}
+          ${flows.length?`<ul style="padding-left:14px">${flows.map(f=>`<li style="font-size:11px;color:var(--tx2);margin-bottom:3px">${x(f)}</li>`).join('')}</ul>`:''}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function scheduleDiagramRender(proj) {
+  const d = proj.diagrams||{};
+  if (!d.c1) return;
+  DIAG_RENDERED = true;
+  ['c1','c2','c3','c4'].forEach(key => {
+    const loading = document.getElementById(`diag-loading-${key}`);
+    const target  = document.getElementById(`diag-target-${key}`);
+    if (!target) return;
+    const code = d[key]?.mermaid||'';
+    renderDiagram(target, code).then(() => {
+      if (loading) loading.style.display = 'none';
+      target.style.display = '';
+    });
+  });
+}
+
+// ── tab Chat ──────────────────────────────────────────────────────────────────
+function renderChat(proj) {
+  return `
+  <div class="card">
+    <div class="card-h">💬 Chat com IA Especialista</div>
+    <p style="font-size:12px;color:var(--tx2);margin-bottom:12px">Converse sobre fluxo, chave de roteamento, riscos, tecnologias ou qualquer aspecto técnico desta integração.</p>
+    <div class="chat-outer">
+      <div class="chat-body" id="chat-body">
+        <div class="msg ai">
+          <div>Olá! Sou especialista nesta integração.${proj.meta?.global_id?' Estou analisando <strong>'+x(proj.meta.global_id)+'</strong>. ':' '}Pergunte sobre o fluxo, chave de roteamento, riscos, código de contingência ou qualquer dúvida técnica.</div>
+          <div class="msg-ts">${fmtTs()}</div>
+        </div>
+      </div>
+      <div class="chat-footer">
+        <input class="chat-input" id="chat-in" placeholder="Ex: Qual é a chave de roteamento e por que?" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();doChat('${proj.id}')}">
+        <button class="btn btn-primary" onclick="doChat('${proj.id}')">Enviar</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function fmtTs() {
+  return new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+}
+
+async function doChat(pid) {
+  const inp = document.getElementById('chat-in');
+  const msg = inp?.value.trim();
+  if (!msg) return;
+  inp.value = '';
+  const body = document.getElementById('chat-body');
+
+  const userEl = document.createElement('div');
+  userEl.className = 'msg user';
+  userEl.innerHTML = `<div>${x(msg)}</div><div class="msg-ts">${fmtTs()}</div>`;
+  body.appendChild(userEl);
+
+  const typingEl = document.createElement('div');
+  typingEl.className = 'msg ai';
+  typingEl.id = 'chat-typing';
+  typingEl.innerHTML = `<div class="typing-dots"><span></span><span></span><span></span></div>`;
+  body.appendChild(typingEl);
+  body.scrollTop = body.scrollHeight;
+
+  HIST.push({role:'user', content:msg});
+  const res = await fetch(`/api/projects/${pid}/chat`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({message:msg, history:HIST})
+  }).then(r => r.json());
+
+  document.getElementById('chat-typing')?.remove();
+  const reply = res.response||'Sem resposta.';
+
+  const aiEl = document.createElement('div');
+  aiEl.className = 'msg ai';
+  aiEl.innerHTML = `<div>${renderMd(reply)}</div><div class="msg-ts">${fmtTs()}</div>`;
+  body.appendChild(aiEl);
+
+  HIST.push({role:'assistant', content:reply});
+  body.scrollTop = body.scrollHeight;
+}
+
+// ── tab Exportar ──────────────────────────────────────────────────────────────
+function renderExport(proj) {
+  if (!proj.meta?.global_id) return emptyState('📤', 'Processe o projeto para exportar.');
+  return `
+  <div class="card">
+    <div class="card-h">📤 Exportar para ValeNet Hub</div>
+    <div class="alert alert-info">Gera os JSONs compatíveis com o hub (porta 8900). Adicione o <code>graph_node</code> em <code>data/graph.json</code> e salve o <code>analysis_file</code> em <code>data/analysis/analysis_${x(proj.meta.global_id)}.json</code>.</div>
+    <button class="btn btn-primary" onclick="loadExport('${proj.id}')">📥 Gerar Export JSON</button>
+    <div id="exp-res" style="margin-top:16px"></div>
+  </div>`;
+}
+
+async function loadExport(pid) {
+  const el = document.getElementById('exp-res');
+  el.innerHTML = '<div class="alert alert-info"><span class="spinner dark"></span> Gerando...</div>';
+  const res = await fetch(`/api/projects/${pid}/export`);
+  if (!res.ok) { el.innerHTML = `<div class="alert alert-err">Erro: ${await res.text()}</div>`; return; }
+  const data = await res.json();
+  window._expData = data;
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-h">📍 Global ID: <code class="mono">${x(data.global_id)}</code></div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-h">📋 graph_node
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="cp(JSON.stringify(window._expData.graph_node,null,2))">📋 Copiar</button>
+      </div>
+      <div class="code-block" style="max-height:200px">${x(JSON.stringify(data.graph_node,null,2))}</div>
+    </div>
+    <div class="card">
+      <div class="card-h">📋 analysis_file
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="cp(JSON.stringify(window._expData.analysis_file,null,2))">📋 Copiar</button>
+      </div>
+      <div class="code-block" style="max-height:260px">${x(JSON.stringify(data.analysis_file,null,2))}</div>
+    </div>`;
+}
+
+// ── delete projeto ────────────────────────────────────────────────────────────
+async function delProject(pid) {
+  if (!confirm('Excluir este projeto permanentemente?')) return;
+  await fetch(`/api/projects/${pid}`, {method:'DELETE'});
+  showLanding();
+  reloadSidebar();
+}
+
+// ── utils ─────────────────────────────────────────────────────────────────────
+function x(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function cp(text) {
+  navigator.clipboard.writeText(text).then(() => toast('Copiado!'));
+}
+
+function emptyState(icon, msg) {
+  return `<div class="empty"><div class="ei">${icon}</div><p>${msg}</p></div>`;
+}
+
+function toast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  Object.assign(t.style, {
+    position:'fixed', bottom:'22px', right:'22px',
+    background:'#0f172a', color:'#f1f5f9',
+    padding:'9px 18px', borderRadius:'8px',
+    fontSize:'13px', fontWeight:'600',
+    zIndex:'999', boxShadow:'0 4px 14px rgba(0,0,0,.25)',
+    transition:'opacity .3s',
+  });
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2200);
+}
+</script>
+</body>
+</html>
