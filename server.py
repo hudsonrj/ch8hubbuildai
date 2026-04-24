@@ -523,6 +523,128 @@ def _run_pipeline(pid: str):
             pass
         raise
 
+# ── auth (session simples via cookie) ────────────────────────────────────────
+
+from fastapi import Request, Response
+
+USERS = {'hatkg': '123rftg*%#$redfg'}
+SESSION_TOKEN = 'ch8_session'
+VALID_TOKEN   = 'ch8_' + str(uuid.uuid5(uuid.NAMESPACE_DNS, 'hatkg.ch8'))
+
+@app.post('/api/login')
+async def login(body: dict, response: Response):
+    user = body.get('username', '').strip()
+    pwd  = body.get('password', '')
+    if USERS.get(user) == pwd:
+        response.set_cookie(SESSION_TOKEN, VALID_TOKEN, httponly=True, samesite='lax')
+        return {'ok': True, 'user': user}
+    raise HTTPException(401, 'Usuário ou senha inválidos')
+
+@app.post('/api/logout')
+async def logout(response: Response):
+    response.delete_cookie(SESSION_TOKEN)
+    return {'ok': True}
+
+def _check_auth(request: Request) -> bool:
+    return request.cookies.get(SESSION_TOKEN) == VALID_TOKEN
+
+@app.get('/api/me')
+async def me(request: Request):
+    if not _check_auth(request):
+        raise HTTPException(401, 'Não autenticado')
+    return {'user': 'hatkg'}
+
+# ── API: dashboard KPIs ───────────────────────────────────────────────────────
+
+@app.get('/api/dashboard')
+async def dashboard(request: Request):
+    if not _check_auth(request):
+        raise HTTPException(401, 'Não autenticado')
+
+    total_proj = done = error = processing = draft = 0
+    total_files = code_files = doc_files = img_files = 0
+    total_repos = 0
+    integrations_found = set()
+    risks_high = risks_med = risks_low = 0
+    cr_scores = []
+    steps_done = 0
+    last_projects = []
+
+    code_exts = {'java','groovy','py','js','ts','sh','xml','xslt','xsd','wsdl','sql','gradle'}
+    doc_exts  = {'pdf','docx','doc','txt','md','csv','xlsx','pptx'}
+    img_exts  = {'png','jpg','jpeg','gif','webp','svg'}
+
+    for pid in sorted(os.listdir(PROJECTS)):
+        pf = os.path.join(PROJECTS, pid, 'project.json')
+        if not os.path.exists(pf): continue
+        with open(pf, encoding='utf-8') as f:
+            p = json.load(f)
+
+        total_proj += 1
+        s = p.get('status', 'draft')
+        if   s == 'done':       done       += 1
+        elif s == 'error':      error      += 1
+        elif s == 'processing': processing += 1
+        else:                   draft      += 1
+
+        # repositórios
+        total_repos += len(p.get('repos', []))
+
+        # arquivos
+        ff = os.path.join(PROJECTS, pid, 'files')
+        if os.path.exists(ff):
+            for fn in os.listdir(ff):
+                ext = fn.rsplit('.', 1)[-1].lower() if '.' in fn else ''
+                total_files += 1
+                if ext in code_exts:  code_files += 1
+                elif ext in doc_exts: doc_files  += 1
+                elif ext in img_exts: img_files  += 1
+
+        # integrações detectadas
+        gid = p.get('meta', {}).get('global_id', '')
+        if gid: integrations_found.add(gid)
+
+        # riscos
+        for r in p.get('analysis', {}).get('riscos', []):
+            sev = r.get('sev', '')
+            if   sev == 'alta':  risks_high += 1
+            elif sev == 'media': risks_med  += 1
+            else:                risks_low  += 1
+
+        # code review score
+        score = p.get('code_review', {}).get('qualidade', {}).get('score')
+        if score is not None:
+            try: cr_scores.append(float(score))
+            except: pass
+
+        # steps concluídos
+        if p.get('meta'):        steps_done += 1
+        if p.get('analysis'):    steps_done += 1
+        if p.get('contingency'): steps_done += 1
+        if p.get('code_review'): steps_done += 1
+        if p.get('diagrams'):    steps_done += 1
+
+        last_projects.append({
+            'id': pid, 'name': p.get('name', pid),
+            'status': s,
+            'global_id': gid,
+            'created_at': p.get('created_at', ''),
+            'files': len(os.listdir(ff)) if os.path.exists(ff) else 0,
+        })
+
+    last_projects.sort(key=lambda x: x['created_at'], reverse=True)
+
+    return {
+        'projects':    {'total': total_proj, 'done': done, 'error': error, 'processing': processing, 'draft': draft},
+        'files':       {'total': total_files, 'code': code_files, 'docs': doc_files, 'images': img_files},
+        'integrations': len(integrations_found),
+        'repos':       total_repos,
+        'risks':       {'high': risks_high, 'medium': risks_med, 'low': risks_low, 'total': risks_high + risks_med + risks_low},
+        'code_review': {'avg_score': round(sum(cr_scores)/len(cr_scores), 1) if cr_scores else None, 'reviewed': len(cr_scores)},
+        'steps_done':  steps_done,
+        'recent':      last_projects[:5],
+    }
+
 # ── API: raiz ─────────────────────────────────────────────────────────────────
 
 @app.get('/')

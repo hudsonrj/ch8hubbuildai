@@ -51,6 +51,172 @@ body {
   line-height: 1.5;
 }
 
+/* ── login screen ── */
+.login-screen {
+  position: fixed; inset: 0; z-index: 1000;
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0f172a 100%);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.login-screen::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(59,130,246,.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.login-card {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.12);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 44px 40px 36px;
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  box-shadow: 0 24px 64px rgba(0,0,0,.5);
+}
+.login-logo {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.login-logo .mark {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 62px; height: 62px; border-radius: 16px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+  font-size: 28px; margin-bottom: 14px;
+  box-shadow: 0 8px 24px rgba(59,130,246,.4);
+}
+.login-logo h1 { font-size: 22px; font-weight: 900; color: #fff; letter-spacing: -.4px; }
+.login-logo h1 span { color: #93c5fd; }
+.login-logo p { font-size: 12px; color: rgba(255,255,255,.4); margin-top: 4px; }
+.login-fg { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+.login-fg label { font-size: 11.5px; font-weight: 600; color: rgba(255,255,255,.5); letter-spacing: .04em; }
+.login-fg input {
+  padding: 11px 14px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all .15s;
+}
+.login-fg input:focus { outline: none; border-color: rgba(59,130,246,.7); background: rgba(255,255,255,.1); box-shadow: 0 0 0 3px rgba(59,130,246,.2); }
+.login-fg input::placeholder { color: rgba(255,255,255,.25); }
+.login-btn {
+  width: 100%; padding: 12px; margin-top: 6px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+  border: none; border-radius: 10px;
+  color: #fff; font-size: 14px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  transition: all .2s;
+  box-shadow: 0 4px 14px rgba(59,130,246,.35);
+}
+.login-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(59,130,246,.45); }
+.login-btn:disabled { opacity: .5; transform: none; cursor: not-allowed; }
+.login-err { background: rgba(220,38,38,.15); border: 1px solid rgba(220,38,38,.3); border-radius: 8px; padding: 10px 13px; font-size: 12px; color: #fca5a5; margin-top: 10px; text-align: center; }
+.login-ver { text-align: center; font-size: 10px; color: rgba(255,255,255,.2); margin-top: 20px; }
+
+/* ── dashboard ── */
+.dash-header {
+  margin-bottom: 24px;
+}
+.dash-header h2 { font-size: 22px; font-weight: 900; color: var(--brand); letter-spacing: -.4px; }
+.dash-header p { font-size: 13px; color: var(--tx2); margin-top: 4px; }
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.kpi-card {
+  background: var(--sur);
+  border: 1px solid var(--brd);
+  border-radius: var(--rl);
+  padding: 18px 20px;
+  box-shadow: var(--sh);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: box-shadow .2s, transform .15s;
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card:hover { box-shadow: var(--shm); transform: translateY(-2px); }
+.kpi-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  border-radius: var(--rl) var(--rl) 0 0;
+}
+.kpi-card.blue::before   { background: linear-gradient(90deg, #3b82f6, #1e40af); }
+.kpi-card.teal::before   { background: linear-gradient(90deg, #0d9488, #0f766e); }
+.kpi-card.green::before  { background: linear-gradient(90deg, #22c55e, #16a34a); }
+.kpi-card.red::before    { background: linear-gradient(90deg, #ef4444, #dc2626); }
+.kpi-card.orange::before { background: linear-gradient(90deg, #f97316, #ea580c); }
+.kpi-card.purple::before { background: linear-gradient(90deg, #a855f7, #9333ea); }
+.kpi-card.yellow::before { background: linear-gradient(90deg, #eab308, #ca8a04); }
+.kpi-card.slate::before  { background: linear-gradient(90deg, #64748b, #475569); }
+.kpi-icon { font-size: 22px; margin-bottom: 6px; }
+.kpi-val  { font-size: 30px; font-weight: 900; color: var(--tx); letter-spacing: -.5px; line-height: 1; }
+.kpi-lbl  { font-size: 11.5px; font-weight: 600; color: var(--tx2); margin-top: 2px; }
+.kpi-sub  { font-size: 11px; color: var(--tx3); margin-top: 3px; }
+
+.dash-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.dash-row.full { grid-template-columns: 1fr; }
+
+/* ── status donut ── */
+.donut-wrap { display: flex; align-items: center; gap: 20px; }
+.donut-svg { flex-shrink: 0; }
+.donut-legend { display: flex; flex-direction: column; gap: 7px; }
+.dl-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.dl-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── recent projects table ── */
+.rtable { width: 100%; border-collapse: collapse; }
+.rtable th { font-size: 11px; font-weight: 700; color: var(--tx3); text-transform: uppercase; letter-spacing: .06em; padding: 7px 10px; border-bottom: 2px solid var(--brd); text-align: left; }
+.rtable td { font-size: 12px; padding: 9px 10px; border-bottom: 1px solid var(--brd); color: var(--tx); }
+.rtable tr:last-child td { border-bottom: none; }
+.rtable tr:hover td { background: var(--sur2); }
+.rtable td .link { color: var(--brand); font-weight: 600; cursor: pointer; }
+.rtable td .link:hover { text-decoration: underline; }
+
+/* ── risk bar ── */
+.rbar-wrap { display: flex; flex-direction: column; gap: 8px; }
+.rbar-item { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+.rbar-label { width: 70px; flex-shrink: 0; font-weight: 600; }
+.rbar-bg { flex: 1; height: 8px; background: var(--sur2); border-radius: 99px; overflow: hidden; }
+.rbar-fill { height: 100%; border-radius: 99px; }
+.rbar-count { width: 24px; text-align: right; font-weight: 700; color: var(--tx2); flex-shrink: 0; }
+
+/* ── score ring ── */
+.score-ring { display: flex; align-items: center; justify-content: center; flex-direction: column; }
+.score-ring svg { transform: rotate(-90deg); }
+.score-ring .score-num { font-size: 26px; font-weight: 900; color: var(--tx); }
+.score-ring .score-lbl { font-size: 11px; color: var(--tx3); }
+
+/* ── user chip ── */
+.user-chip {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 10px 5px 5px;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 99px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.user-chip:hover { background: rgba(255,255,255,.18); }
+.user-avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1e40af);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+}
+.user-name { font-size: 11px; font-weight: 600; color: rgba(255,255,255,.85); }
+
+@media(max-width:1100px) { .kpi-grid { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:900px)  { .kpi-grid { grid-template-columns: 1fr 1fr; } .dash-row { grid-template-columns: 1fr; } }
+
 /* ── layout ── */
 .app { display: grid; grid-template-columns: 272px 1fr; min-height: 100vh; }
 
@@ -666,12 +832,29 @@ code.mono {
 </style>
 </head>
 <body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="mark">🏗️</div>
+      <h1>CH8 <span>Hub Build AI</span></h1>
+      <p>Plataforma de Análise de Integrações · Hatpkg TAquino 1.1</p>
+    </div>
+    <div class="login-fg"><label>USUÁRIO</label><input id="lg-user" placeholder="usuário" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="login-fg"><label>SENHA</label><input type="password" id="lg-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="login-btn" id="lg-btn" onclick="doLogin()">Entrar</button>
+    <div id="lg-err" style="display:none" class="login-err"></div>
+    <div class="login-ver">CH8 Hub Build AI v1.0 · porta 8901</div>
+  </div>
+</div>
+
 <div class="app">
 
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sb">
   <div class="sb-header">
-    <div class="sb-logo">CH8 <span>Hub Build AI</span></div>
+    <div class="sb-logo" onclick="showDashboard()" style="cursor:pointer">CH8 <span>Hub Build AI</span></div>
     <div class="sb-sub">Plataforma de ingestão e geração por IA</div>
   </div>
   <button class="sb-new" onclick="openNewModal()"><span>＋</span> Novo Projeto</button>
@@ -694,6 +877,10 @@ code.mono {
       <span class="tb-sub" id="tb-sub" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
     </div>
     <div class="tb-right" id="tb-right"></div>
+    <div class="user-chip" id="user-chip" onclick="doLogout()" title="Clique para sair" style="display:none;margin-left:10px">
+      <div class="user-avatar" id="user-avatar">H</div>
+      <span class="user-name" id="user-name">hatkg</span>
+    </div>
   </header>
   <div class="content" id="content">
     <div class="landing" id="landing">
@@ -848,7 +1035,7 @@ let ATAB = null;
 let DIAG_RENDERED = false;
 
 // ── boot ──────────────────────────────────────────────────────────────────────
-addEventListener('DOMContentLoaded', () => reloadSidebar());
+addEventListener('DOMContentLoaded', boot);
 
 // ── sidebar ───────────────────────────────────────────────────────────────────
 async function reloadSidebar() {
@@ -907,7 +1094,7 @@ async function openProject(pid) {
   if (proj.status === 'processing') startPoll();
 }
 
-function showLanding() {
+async function showLanding() {
   CUR = null;
   clearInterval(POLL);
   document.getElementById('landing').style.display = '';
@@ -916,7 +1103,7 @@ function showLanding() {
   document.getElementById('tb-sep').style.display = 'none';
   document.getElementById('tb-sub').textContent = '';
   document.getElementById('tb-right').innerHTML = '';
-  reloadSidebar();
+  await reloadSidebar();
 }
 
 // ── renderizar projeto ────────────────────────────────────────────────────────
@@ -1804,6 +1991,246 @@ function toast(msg) {
   });
   document.body.appendChild(t);
   setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2200);
+}
+
+// ── auth ───────────────────────────────────────────────────────────────────────
+async function boot() {
+  try {
+    const me = await fetch('/api/me').then(r => r.ok ? r.json() : null);
+    if (!me) { showLogin(); return; }
+    hideLogin(me.user);
+    await reloadSidebar();
+  } catch(e) {
+    showLogin();
+  }
+}
+
+function showLogin() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('user-chip').style.display = 'none';
+  setTimeout(() => document.getElementById('lg-user').focus(), 100);
+}
+
+function hideLogin(username) {
+  document.getElementById('login-screen').style.display = 'none';
+  const chip = document.getElementById('user-chip');
+  chip.style.display = 'flex';
+  const uname = username || 'hatkg';
+  document.getElementById('user-name').textContent = uname;
+  document.getElementById('user-avatar').textContent = uname[0].toUpperCase();
+}
+
+async function doLogin() {
+  const btn = document.getElementById('lg-btn');
+  const err = document.getElementById('lg-err');
+  const user = document.getElementById('lg-user').value.trim();
+  const pass = document.getElementById('lg-pass').value;
+  if (!user || !pass) { showErr('Preencha usuário e senha.'); return; }
+  btn.disabled = true; btn.textContent = 'Entrando...';
+  err.style.display = 'none';
+  try {
+    const res = await fetch('/api/login', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({username:user, password:pass})
+    });
+    const data = await res.json();
+    if (!res.ok) { showErr(data.detail || 'Usuário ou senha inválidos.'); btn.disabled=false; btn.textContent='Entrar'; return; }
+    hideLogin(data.user);
+    await reloadSidebar();
+    showDashboard();
+  } catch(e) {
+    showErr('Erro de conexão.');
+    btn.disabled = false; btn.textContent = 'Entrar';
+  }
+  function showErr(msg) { err.textContent=msg; err.style.display='block'; btn.disabled=false; btn.textContent='Entrar'; }
+}
+
+async function doLogout() {
+  if (!confirm('Sair da plataforma?')) return;
+  await fetch('/api/logout', {method:'POST'}).catch(()=>{});
+  CUR = null; clearInterval(POLL);
+  document.getElementById('user-chip').style.display = 'none';
+  document.getElementById('lg-user').value = '';
+  document.getElementById('lg-pass').value = '';
+  document.getElementById('lg-err').style.display = 'none';
+  document.getElementById('lg-btn').disabled = false;
+  document.getElementById('lg-btn').textContent = 'Entrar';
+  showLanding();
+  showLogin();
+}
+
+// ── dashboard ──────────────────────────────────────────────────────────────────
+async function showDashboard() {
+  CUR = null; clearInterval(POLL); HIST = [];
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('pview').style.display = '';
+  document.getElementById('tb-title').textContent = 'CH8 Hub Build AI';
+  document.getElementById('tb-sep').style.display = 'none';
+  document.getElementById('tb-sub').textContent = '';
+  document.getElementById('tb-right').innerHTML = '';
+
+  const pview = document.getElementById('pview');
+  pview.innerHTML = '<div style="padding:40px;text-align:center"><span class="spinner dark"></span> Carregando dashboard...</div>';
+
+  try {
+    const res = await fetch('/api/dashboard');
+    if (res.status === 401) { showLogin(); return; }
+    const d = await res.json();
+    pview.innerHTML = renderDashboard(d);
+    await reloadSidebar();
+  } catch(e) {
+    pview.innerHTML = `<div class="alert alert-err" style="margin:24px">Erro ao carregar dashboard: ${e.message}</div>`;
+  }
+}
+
+function renderDashboard(d) {
+  const p = d.projects || {};
+  const f = d.files || {};
+  const r = d.risks || {};
+  const cr = d.code_review || {};
+
+  const kpis = [
+    {icon:'🗂️', val:p.total||0,       lbl:'Total de Projetos',   sub:`${p.done||0} concluídos`,        color:'blue'},
+    {icon:'✅', val:p.done||0,        lbl:'Processados',          sub:`${p.error||0} com erro`,          color:'green'},
+    {icon:'📄', val:f.documents||0,   lbl:'Documentos',           sub:'PDF, DOCX, TXT…',                color:'teal'},
+    {icon:'☕', val:f.code||0,        lbl:'Arquivos de Código',   sub:'Java, XML, XSLT…',               color:'purple'},
+    {icon:'🖼️', val:f.images||0,      lbl:'Imagens',              sub:'PNG, JPG, GIF…',                 color:'orange'},
+    {icon:'🔗', val:d.repos||0,       lbl:'Repositórios',         sub:'Azure DevOps / GitHub',          color:'slate'},
+    {icon:'🔌', val:d.integrations||0,lbl:'Integrações Mapeadas', sub:'global_id únicos',               color:'blue'},
+    {icon:'⚠️', val:(r.alta||0)+(r.media||0)+(r.baixa||0), lbl:'Total de Riscos', sub:`${r.alta||0} alta · ${r.media||0} média`, color:'red'},
+  ];
+
+  const kpiHtml = kpis.map(k => `
+    <div class="kpi-card ${k.color}">
+      <div class="kpi-icon">${k.icon}</div>
+      <div class="kpi-val">${k.val}</div>
+      <div class="kpi-lbl">${k.lbl}</div>
+      <div class="kpi-sub">${k.sub}</div>
+    </div>`).join('');
+
+  // Donut status
+  const total = p.total || 1;
+  const donutData = [
+    {label:'Concluídos', val:p.done||0,       color:'#22c55e'},
+    {label:'Erros',      val:p.error||0,      color:'#ef4444'},
+    {label:'Rascunho',   val:p.draft||0,      color:'#64748b'},
+    {label:'Processando',val:p.processing||0, color:'#f59e0b'},
+  ].filter(x => x.val > 0);
+
+  let donutSvg = '';
+  const R = 42; const CX = 56; const CY = 56; const circumference = 2 * Math.PI * R;
+  let offset = 0;
+  const segments = donutData.map(item => {
+    const pct = item.val / total;
+    const dash = pct * circumference;
+    const seg = `<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${item.color}" stroke-width="14" stroke-dasharray="${dash.toFixed(2)} ${(circumference-dash).toFixed(2)}" stroke-dashoffset="${-offset.toFixed(2)}" stroke-linecap="butt"/>`;
+    offset += dash;
+    return seg;
+  }).join('');
+
+  donutSvg = `<svg class="donut-svg" width="112" height="112" viewBox="0 0 112 112">
+    <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="#e2e8f0" stroke-width="14"/>
+    ${segments}
+    <text x="${CX}" y="${CY-4}" text-anchor="middle" font-size="18" font-weight="900" fill="#0f172a">${p.total||0}</text>
+    <text x="${CX}" y="${CY+14}" text-anchor="middle" font-size="10" fill="#94a3b8">projetos</text>
+  </svg>`;
+
+  const legendHtml = donutData.map(item => `
+    <div class="dl-item"><div class="dl-dot" style="background:${item.color}"></div><span>${item.val} ${item.label}</span></div>`).join('');
+
+  // Risks bar
+  const riskTotal = Math.max((r.alta||0)+(r.media||0)+(r.baixa||0), 1);
+  const riskHtml = [
+    {lbl:'Alta',  val:r.alta||0,  color:'#ef4444'},
+    {lbl:'Média', val:r.media||0, color:'#f59e0b'},
+    {lbl:'Baixa', val:r.baixa||0, color:'#22c55e'},
+  ].map(item => `
+    <div class="rbar-item">
+      <span class="rbar-label">${item.lbl}</span>
+      <div class="rbar-bg"><div class="rbar-fill" style="width:${(item.val/riskTotal*100).toFixed(1)}%;background:${item.color}"></div></div>
+      <span class="rbar-count">${item.val}</span>
+    </div>`).join('');
+
+  // Score ring
+  const score = cr.avg_score || 0;
+  const scoreAngle = score / 10;
+  const scoreColor = score >= 8 ? '#22c55e' : score >= 6 ? '#f59e0b' : '#ef4444';
+  const scoreR = 38; const scoreCirc = 2*Math.PI*scoreR;
+  const scoreDash = scoreAngle * scoreCirc;
+  const scoreRingHtml = `
+    <div class="score-ring">
+      <svg width="96" height="96" viewBox="0 0 96 96" style="transform:rotate(-90deg)">
+        <circle cx="48" cy="48" r="${scoreR}" fill="none" stroke="#e2e8f0" stroke-width="10"/>
+        <circle cx="48" cy="48" r="${scoreR}" fill="none" stroke="${scoreColor}" stroke-width="10"
+          stroke-dasharray="${scoreDash.toFixed(2)} ${(scoreCirc-scoreDash).toFixed(2)}" stroke-linecap="round"/>
+      </svg>
+      <div style="margin-top:-64px;text-align:center;position:relative;z-index:1">
+        <div class="score-num" style="color:${scoreColor}">${score.toFixed(1)}</div>
+        <div class="score-lbl">/10</div>
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:var(--tx2);text-align:center">${cr.reviewed||0} projetos revisados</div>
+    </div>`;
+
+  // Recent table
+  const recent = d.recent || [];
+  const recentHtml = recent.length ? `
+    <table class="rtable">
+      <thead><tr>
+        <th>Projeto</th><th>Global ID</th><th>Status</th><th>Arquivos</th><th>Ação</th>
+      </tr></thead>
+      <tbody>
+        ${recent.map(p => `<tr>
+          <td>${x(p.name)}</td>
+          <td><code style="font-size:11px">${x(p.global_id||'—')}</code></td>
+          <td><span class="status-pill ${p.status}">${sIcon(p.status)} ${p.status}</span></td>
+          <td>${p.files_count||0}</td>
+          <td><span class="link" onclick="openProject('${p.id}')">Abrir →</span></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>` : '<p style="font-size:13px;color:var(--tx3);text-align:center;padding:24px">Nenhum projeto ainda.</p>';
+
+  return `
+  <div style="padding:0 4px">
+    <div class="dash-header">
+      <h2>📊 Dashboard</h2>
+      <p>Visão geral de todos os projetos e processamentos · atualizado agora</p>
+    </div>
+
+    <div class="kpi-grid">${kpiHtml}</div>
+
+    <div class="dash-row">
+      <div class="card">
+        <div class="card-h">📈 Status dos Projetos</div>
+        <div class="donut-wrap">
+          ${donutSvg}
+          <div class="donut-legend">${legendHtml || '<span style="font-size:12px;color:var(--tx3)">Sem dados</span>'}</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h">⚠️ Riscos por Severidade</div>
+        <div class="rbar-wrap" style="margin-bottom:20px">${riskHtml}</div>
+        <div class="card-h" style="margin-top:16px">🏆 Score Médio Code Review</div>
+        ${scoreRingHtml}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h" style="justify-content:space-between">
+        🕐 Projetos Recentes
+        <button class="btn btn-ghost btn-sm" onclick="showDashboard()">↺ Atualizar</button>
+      </div>
+      ${recentHtml}
+    </div>
+
+    <div class="card" style="margin-top:4px">
+      <div class="card-h">🚀 Ações Rápidas</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="openNewModal()">＋ Novo Projeto</button>
+        <button class="btn btn-ghost" onclick="showDashboard()">↺ Atualizar KPIs</button>
+      </div>
+    </div>
+  </div>`;
 }
 </script>
 </body>
